@@ -25,6 +25,7 @@ class ModuleConfig(BaseModel):
     name: str
     version: str
     type: ModuleType
+    proprietary: bool = False
     description: Optional[str] = None
     skills: List[SkillConfig] = Field(default_factory=list)
     commands: List[CommandConfig] = Field(default_factory=list)

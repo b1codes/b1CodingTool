@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 import yaml
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 class B1Config(BaseModel):
     upstream_repo: str = ""
@@ -11,6 +11,7 @@ class B1Config(BaseModel):
     github_repo: Optional[str] = None
     default_branch: Optional[str] = None
     skillsmp_api_key: Optional[str] = None
+    bundles: Dict[str, List[str]] = Field(default_factory=dict)
     
     @classmethod
     def load(cls, project_dir: Path) -> "B1Config":

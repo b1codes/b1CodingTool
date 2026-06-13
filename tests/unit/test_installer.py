@@ -88,3 +88,27 @@ def test_install_continues_when_skill_command_fails(tmp_path):
         # Should NOT raise — installation continues despite skill failure
         ModuleInstaller(project).install(src)
     assert (project / ".agents" / "modules" / "test-module").is_dir()
+
+
+def test_install_adds_proprietary_module_to_gitignore(tmp_path):
+    mod_dir = tmp_path / "src" / "proprietary-module"
+    mod_dir.mkdir(parents=True)
+    config = {
+        "name": "proprietary-module",
+        "version": "1.0.0",
+        "type": "development",
+        "proprietary": True,
+        "description": "A proprietary test module",
+    }
+    (mod_dir / "b1-module.yaml").write_text(yaml.dump(config), encoding="utf-8")
+    (mod_dir / "context").mkdir()
+    (mod_dir / "context" / "secret.md").write_text("# Secret\n", encoding="utf-8")
+
+    project = _project(tmp_path)
+    ModuleInstaller(project).install(mod_dir)
+
+    gitignore = project / ".gitignore"
+    assert gitignore.exists()
+    content = gitignore.read_text(encoding="utf-8")
+    assert ".agents/modules/proprietary-module" in content.splitlines()
+

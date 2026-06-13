@@ -54,6 +54,10 @@ class ModuleInstaller:
             shutil.copytree(source_path, target_mod_dir, ignore=shutil.ignore_patterns('.git', '__pycache__'))
             console.print(f"[green]\u2714[/green] Copied files to [blue]{target_mod_dir.relative_to(self.project_dir)}[/blue]")
         
+        # 1.5. Gitignore if proprietary
+        if config.proprietary:
+            self._add_to_gitignore(config.name)
+        
         # 2. Run skill setup scripts
         if config.skills:
             console.print("\n[bold]Preparing Skills[/bold]")
@@ -97,4 +101,22 @@ class ModuleInstaller:
                 progress.update(task, description=f"[red]✖[/red] Failed setup for [cyan]{name}[/cyan]")
                 console.print(f"[red]Error Output:[/red]\n{e.stderr}")
                 # Don't halt the whole installation if one skill script fails, just note it.
+
+    def _add_to_gitignore(self, module_name: str):
+        """Adds the proprietary module to .gitignore so it is not committed to the consumer project repo."""
+        gitignore_path = self.project_dir / ".gitignore"
+        entry = f".agents/modules/{module_name}"
+        
+        if gitignore_path.exists():
+            content = gitignore_path.read_text(encoding="utf-8")
+            if entry not in content.splitlines():
+                if content and not content.endswith("\n"):
+                    content += "\n"
+                content += f"{entry}\n"
+                gitignore_path.write_text(content, encoding="utf-8")
+                console.print(f"[dim]Added {entry} to .gitignore (proprietary lock)[/dim]")
+        else:
+            gitignore_path.write_text(f"{entry}\n", encoding="utf-8")
+            console.print(f"[dim]Created .gitignore and added {entry} (proprietary lock)[/dim]")
+
 
