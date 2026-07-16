@@ -105,10 +105,10 @@ def test_pair_context_generates_agent_files(client, cd_project):
 
 
 def test_pair_context_updates_active_agents_if_provided(client, cd_project):
-    resp = client.post("/api/context/pair", json={"agents": ["CODEX"]})
+    resp = client.post("/api/context/pair", json={"agents": ["GEMINI"]})
     assert resp.status_code == 200
-    assert (cd_project / "AGENTS.md").exists()
+    assert (cd_project / "GEMINI.md").exists()
     
     # Verify config was updated
     resp_config = client.get("/api/config")
-    assert resp_config.json()["active_agents"] == ["CODEX"]
+    assert resp_config.json()["active_agents"] == ["GEMINI"]

@@ -24,7 +24,7 @@ def pair_cmd():
     
     if not config.active_agents:
         console.print("[blue]Configuring active agents...[/blue]")
-        agent_input = typer.prompt("Which agents do you want to target? (comma separated, e.g. CLAUDE,GEMINI,CODEX)", default="CLAUDE,GEMINI,CODEX")
+        agent_input = typer.prompt("Which agents do you want to target? (comma separated, e.g. CLAUDE,GEMINI)", default="CLAUDE,GEMINI")
         agents = [a.strip().upper() for a in agent_input.split(",") if a.strip()]
         config.active_agents = agents
         config.save(project_dir)

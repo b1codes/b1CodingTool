@@ -58,7 +58,7 @@ def b1_install(source: str, link: bool = False) -> str:
 @mcp.tool()
 def b1_pair() -> str:
     """
-    Synchronizes the centralized agents.md context across agent-specific files (CLAUDE.md, GEMINI.md, AGENTS.md).
+    Synchronizes the centralized agents.md context across agent-specific files (CLAUDE.md, GEMINI.md).
     """
     project_dir = Path.cwd()
     if not (project_dir / ".agents").exists():
@@ -68,7 +68,7 @@ def b1_pair() -> str:
     
     if not config.active_agents:
         # Default agents if none configured
-        config.active_agents = ["CLAUDE", "GEMINI", "CODEX"]
+        config.active_agents = ["CLAUDE", "GEMINI"]
         config.save(project_dir)
         
     compiler = ContextCompiler(project_dir, config=config)

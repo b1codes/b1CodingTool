@@ -70,7 +70,7 @@ def make_project(tmp_path):
         # config.yaml
         config_data = {
             "upstream_repo": upstream_repo or "",
-            "active_agents": agents or ["CLAUDE", "GEMINI", "CODEX"],
+            "active_agents": agents or ["CLAUDE", "GEMINI"],
         }
         (project_dir / ".agents" / "config.yaml").write_text(
             yaml.dump(config_data), encoding="utf-8"
