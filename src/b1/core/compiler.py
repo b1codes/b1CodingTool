@@ -4,96 +4,101 @@ from rich.console import Console
 
 from b1.core.config import B1Config
 from b1.core.schema import ModuleConfig
+from b1.core.compiled import ContextItem, CompiledContext, SHARED, PERSONAL, PROPRIETARY
 
 console = Console()
+
 
 class ContextCompiler:
     def __init__(self, project_dir: Path, config: Optional[B1Config] = None):
         self.project_dir = project_dir
         self.config = config
-        
-    def compile(self) -> str:
-        """
-        Gathers content from the root agents.md, project-specific agents.md, 
-        and module context files to form a unified document.
-        """
-        combined = []
-        
-        # 0. GitHub Metadata
-        if self.config and self.config.github_owner and self.config.github_repo:
-            combined.append("<!-- b1CodingTool: GitHub Repository -->\n")
-            combined.append("# GitHub Repository\n")
-            combined.append(f"- URL: https://github.com/{self.config.github_owner}/{self.config.github_repo}\n")
-            if self.config.default_branch:
-                combined.append(f"- Default Branch: {self.config.default_branch}\n")
-            combined.append("\n\n")
 
-        # 1. Root AGENTS.md / agents.md
-        root_agent = self.project_dir / "AGENTS.md"
-        if not root_agent.exists():
-            root_agent = self.project_dir / "agents.md"
-            
-        if root_agent.exists():
-            combined.append("<!-- b1CodingTool: Root Context -->\n")
-            content = root_agent.read_text(encoding="utf-8").strip()
-            # Strip auto-generated section if present
-            start_marker = "<!-- b1CodingTool: start -->"
-            if start_marker in content:
-                content = content.split(start_marker)[0].strip()
-            combined.append(content)
-            combined.append("\n\n")
-            
-        # 2. Project-specific AGENTS.md / agents.md
-        project_agent = self.project_dir / ".agents" / "project" / "AGENTS.md"
-        if not project_agent.exists():
-            project_agent = self.project_dir / ".agents" / "project" / "agents.md"
-            
-        if project_agent.exists():
-            combined.append("<!-- b1CodingTool: Project Context -->\n")
-            content = project_agent.read_text(encoding="utf-8").strip()
-            start_marker = "<!-- b1CodingTool: start -->"
-            if start_marker in content:
-                content = content.split(start_marker)[0].strip()
-            combined.append(content)
-            combined.append("\n\n")
-            
-        # 3. Installed modules' context folder
+    def compile(self) -> CompiledContext:
+        items: List[ContextItem] = []
+
+        # 0. GitHub metadata (eager, shared)
+        if self.config and self.config.github_owner and self.config.github_repo:
+            lines = [
+                "# GitHub Repository",
+                f"- URL: https://github.com/{self.config.github_owner}/{self.config.github_repo}",
+            ]
+            if self.config.default_branch:
+                lines.append(f"- Default Branch: {self.config.default_branch}")
+            items.append(ContextItem(
+                title="GitHub Repository", body="\n".join(lines),
+                source_path="", eager=True, visibility=SHARED,
+            ))
+
+        # 1. Shared project seed (eager, shared)
+        project_seed = self.project_dir / ".agents" / "project" / "AGENTS.md"
+        if project_seed.exists():
+            items.append(ContextItem(
+                title="Project Context",
+                body=project_seed.read_text(encoding="utf-8").strip(),
+                source_path=".agents/project/AGENTS.md",
+                eager=True, visibility=SHARED,
+            ))
+
+        # 2. Personal local seed (eager, personal)
+        local_seed = self.project_dir / ".agents" / "local" / "AGENTS.md"
+        if local_seed.exists():
+            items.append(ContextItem(
+                title="Local Context",
+                body=local_seed.read_text(encoding="utf-8").strip(),
+                source_path=".agents/local/AGENTS.md",
+                eager=True, visibility=PERSONAL,
+            ))
+
+        # 3. Modules (capabilities eager; context files lazy). Visibility by proprietary flag.
         modules_dir = self.project_dir / ".agents" / "modules"
         if modules_dir.exists():
-            for mod in [d for d in modules_dir.iterdir() if d.is_dir()]:
-                # 3a. Add module capabilities (skills and commands)
-                config_path = mod / "b1-module.yaml"
-                if not config_path.exists():
-                    config_path = mod / "module.yaml"
+            for mod in sorted([d for d in modules_dir.iterdir() if d.is_dir()], key=lambda p: p.name):
+                items.extend(self._compile_module(mod))
 
-                if config_path.exists():
-                    try:
-                        mod_config = ModuleConfig.from_yaml(config_path)
-                        if mod_config.commands or mod_config.skills:
-                            combined.append(f"<!-- b1CodingTool: Module Capabilities [{mod.name}] -->\n")
-                            combined.append(f"### {mod.name} Capabilities\n\n")
+        return CompiledContext(items)
 
-                            if mod_config.commands:
-                                combined.append("#### Commands\n")
-                                for cmd in mod_config.commands:
-                                    combined.append(f"- `{cmd.name}`: {cmd.description}\n")
-                                combined.append("\n")
+    def _compile_module(self, mod: Path) -> List[ContextItem]:
+        out: List[ContextItem] = []
+        config_path = mod / "b1-module.yaml"
+        if not config_path.exists():
+            config_path = mod / "module.yaml"
 
-                            if mod_config.skills:
-                                combined.append("#### Skills\n")
-                                for skill in mod_config.skills:
-                                    combined.append(f"- **{skill.name}**: {skill.description}\n")
-                                combined.append("\n")
-                            combined.append("\n")
-                    except Exception as e:
-                        console.print(f"[yellow]Warning: Could not load config for module {mod.name}: {e}[/yellow]")
+        visibility = SHARED
+        mod_config: Optional[ModuleConfig] = None
+        if config_path.exists():
+            try:
+                mod_config = ModuleConfig.from_yaml(config_path)
+                visibility = PROPRIETARY if mod_config.proprietary else SHARED
+            except Exception as e:
+                console.print(f"[yellow]Warning: Could not load config for module {mod.name}: {e}[/yellow]")
 
-                # 3b. Add module context files
-                context_dir = mod / "context"
-                if context_dir.exists():
-                    for md_file in context_dir.glob("*.md"):
-                        combined.append(f"<!-- b1CodingTool: Module Context [{mod.name}] - {md_file.name} -->\n")
-                        combined.append(md_file.read_text(encoding="utf-8").strip())
-                        combined.append("\n\n")
-                        
-        return "".join(combined).strip()
+        # Capabilities (commands/skills) -> eager
+        if mod_config and (mod_config.commands or mod_config.skills):
+            lines = [f"### {mod.name} Capabilities", ""]
+            if mod_config.commands:
+                lines.append("#### Commands")
+                for cmd in mod_config.commands:
+                    lines.append(f"- `{cmd.name}`: {cmd.description}")
+                lines.append("")
+            if mod_config.skills:
+                lines.append("#### Skills")
+                for skill in mod_config.skills:
+                    lines.append(f"- **{skill.name}**: {skill.description}")
+                lines.append("")
+            out.append(ContextItem(
+                title=f"{mod.name} Capabilities", body="\n".join(lines).strip(),
+                source_path="", eager=True, visibility=visibility,
+            ))
+
+        # Context files -> lazy pointers
+        context_dir = mod / "context"
+        if context_dir.exists():
+            for md_file in sorted(context_dir.glob("*.md")):
+                rel = md_file.relative_to(self.project_dir).as_posix()
+                out.append(ContextItem(
+                    title=f"{mod.name}: {md_file.name}",
+                    body=md_file.read_text(encoding="utf-8").strip(),
+                    source_path=rel, eager=False, visibility=visibility,
+                ))
+        return out
