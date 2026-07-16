@@ -57,12 +57,12 @@ def make_project(tmp_path):
         (project_dir / ".agents" / "project").mkdir(parents=True)
         (project_dir / ".agents" / "modules").mkdir(parents=True)
 
-        # agents.md files
-        (project_dir / "agents.md").write_text(
+        # AGENTS.md files
+        (project_dir / "AGENTS.md").write_text(
             "# b1CodingTool: Global Context\nRoot agent context.\n",
             encoding="utf-8",
         )
-        (project_dir / ".agents" / "project" / "agents.md").write_text(
+        (project_dir / ".agents" / "project" / "AGENTS.md").write_text(
             "# b1CodingTool: Project Context\nProject-specific context.\n",
             encoding="utf-8",
         )

@@ -6,6 +6,12 @@ from b1.cli import app
 runner = CliRunner()
 
 
+def case_sensitive_exists(path: Path) -> bool:
+    if not path.exists():
+        return False
+    return path.name in {p.name for p in path.parent.iterdir()}
+
+
 def test_init_creates_agent_directory(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, ["init"])
@@ -22,13 +28,13 @@ def test_init_creates_docs_directory(tmp_path, monkeypatch):
 def test_init_creates_agent_md(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     runner.invoke(app, ["init"])
-    assert (tmp_path / "agents.md").exists()
+    assert case_sensitive_exists(tmp_path / "AGENTS.md")
 
 
 def test_init_creates_project_agent_md(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     runner.invoke(app, ["init"])
-    assert (tmp_path / ".agents" / "project" / "agents.md").exists()
+    assert case_sensitive_exists(tmp_path / ".agents" / "project" / "AGENTS.md")
 
 
 def test_init_creates_gitignore(tmp_path, monkeypatch):

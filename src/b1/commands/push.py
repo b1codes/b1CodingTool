@@ -39,7 +39,9 @@ def push_cmd():
         
     # 2. Intelligent Scanning and Rule Extraction
     extractor = RuleExtractor()
-    project_agent_path = project_dir / ".agents" / "project" / "agents.md"
+    project_agent_path = project_dir / ".agents" / "project" / "AGENTS.md"
+    if not project_agent_path.exists():
+        project_agent_path = project_dir / ".agents" / "project" / "agents.md"
     extracted_content = ""
     rules_count = 0
     
@@ -65,10 +67,15 @@ def push_cmd():
         # 2. Selective Staging
         staged_any = False
         
-        # Always check root agents.md as it's project-agnostic
-        root_agent = project_dir / "agents.md"
+        # Always check root AGENTS.md / agents.md as it's project-agnostic
+        root_agent = project_dir / "AGENTS.md"
+        root_agent_name = "AGENTS.md"
+        if not root_agent.exists():
+            root_agent = project_dir / "agents.md"
+            root_agent_name = "agents.md"
+            
         if root_agent.exists():
-            subprocess.run(["git", "add", "agents.md"], check=False, capture_output=True)
+            subprocess.run(["git", "add", root_agent_name], check=False, capture_output=True)
             staged_any = True
             
         # Stage only the extracted learnings

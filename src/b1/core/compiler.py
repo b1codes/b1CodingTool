@@ -28,18 +28,33 @@ class ContextCompiler:
                 combined.append(f"- Default Branch: {self.config.default_branch}\n")
             combined.append("\n\n")
 
-        # 1. Root agents.md
-        root_agent = self.project_dir / "agents.md"
+        # 1. Root AGENTS.md / agents.md
+        root_agent = self.project_dir / "AGENTS.md"
+        if not root_agent.exists():
+            root_agent = self.project_dir / "agents.md"
+            
         if root_agent.exists():
             combined.append("<!-- b1CodingTool: Root Context -->\n")
-            combined.append(root_agent.read_text(encoding="utf-8").strip())
+            content = root_agent.read_text(encoding="utf-8").strip()
+            # Strip auto-generated section if present
+            start_marker = "<!-- b1CodingTool: start -->"
+            if start_marker in content:
+                content = content.split(start_marker)[0].strip()
+            combined.append(content)
             combined.append("\n\n")
             
-        # 2. Project-specific agents.md
-        project_agent = self.project_dir / ".agents" / "project" / "agents.md"
+        # 2. Project-specific AGENTS.md / agents.md
+        project_agent = self.project_dir / ".agents" / "project" / "AGENTS.md"
+        if not project_agent.exists():
+            project_agent = self.project_dir / ".agents" / "project" / "agents.md"
+            
         if project_agent.exists():
             combined.append("<!-- b1CodingTool: Project Context -->\n")
-            combined.append(project_agent.read_text(encoding="utf-8").strip())
+            content = project_agent.read_text(encoding="utf-8").strip()
+            start_marker = "<!-- b1CodingTool: start -->"
+            if start_marker in content:
+                content = content.split(start_marker)[0].strip()
+            combined.append(content)
             combined.append("\n\n")
             
         # 3. Installed modules' context folder

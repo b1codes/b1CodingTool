@@ -61,7 +61,7 @@ def test_push_extracts_rules_and_stages_selectively(make_project, monkeypatch):
     monkeypatch.chdir(project)
     
     # Add a project agent file with generalized rules
-    project_agent = project / ".agents" / "project" / "agents.md"
+    project_agent = project / ".agents" / "project" / "AGENTS.md"
     project_agent.parent.mkdir(parents=True, exist_ok=True)
     project_agent.write_text("""
 # Project Context
@@ -72,13 +72,13 @@ General rule.
 """, encoding="utf-8")
 
     # status --porcelain returns staged files
-    status_mock = MagicMock(stdout="M agents.md\n?? .agents/learnings.md\n", returncode=0)
+    status_mock = MagicMock(stdout="M AGENTS.md\n?? .agents/learnings.md\n", returncode=0)
 
     with patch(_MOCK_WHICH, return_value="/usr/bin/gh"):
         with patch(_MOCK_RUN) as mock_run:
             mock_run.side_effect = [
                 _successful_run(),           # git checkout -b
-                _successful_run(),           # git add agents.md
+                _successful_run(),           # git add AGENTS.md
                 _successful_run(),           # git add .agents/learnings.md
                 status_mock,                 # git status --porcelain
                 _successful_run(),           # git commit
@@ -89,7 +89,7 @@ General rule.
 
     # Verify selective git add calls
     add_calls = [c[0][0] for c in mock_run.call_args_list if c[0][0][0:2] == ["git", "add"]]
-    assert ["git", "add", "agents.md"] in add_calls
+    assert ["git", "add", "AGENTS.md"] in add_calls
     assert ["git", "add", ".agents/learnings.md"] in add_calls
     # Ensure it did NOT add the whole .agents/ dir
     assert ["git", "add", ".agents/"] not in add_calls
