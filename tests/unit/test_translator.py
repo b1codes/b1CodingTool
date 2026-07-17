@@ -58,3 +58,27 @@ def test_claude_includes_proprietary_eager_but_root_excludes_it(tmp_path):
 
     assert "Use /llc-widget for glass UI" in claude                    # proprietary eager inlined into CLAUDE.md
     assert "Use /llc-widget for glass UI" not in root                  # excluded from root AGENTS.md
+
+
+def test_codex_override_has_personal_and_proprietary_only(tmp_path):
+    AgentTranslator(tmp_path).render_codex(_compiled())
+    override = (tmp_path / "AGENTS.override.md").read_text(encoding="utf-8")
+    assert "Sandbox: http://localhost:9000" in override                # personal
+    assert ".agents/modules/llc-react/context/a.md" in override        # proprietary pointer
+    assert "Never call prod API" not in override                       # shared stays in root AGENTS.md
+    assert "react-web" not in override                                 # public stays in root AGENTS.md
+
+
+def test_antigravity_local_rules_file(tmp_path):
+    AgentTranslator(tmp_path).render_antigravity(_compiled())
+    rules = (tmp_path / ".agents" / "rules" / "local.md").read_text(encoding="utf-8")
+    assert "Sandbox: http://localhost:9000" in rules
+    assert ".agents/modules/llc-react/context/a.md" in rules
+
+
+def test_codex_skips_when_no_personal_or_proprietary(tmp_path):
+    empty = CompiledContext([
+        ContextItem("Project Context", "rule", ".agents/project/AGENTS.md", eager=True, visibility=SHARED),
+    ])
+    AgentTranslator(tmp_path).render_codex(empty)
+    assert not (tmp_path / "AGENTS.override.md").exists()

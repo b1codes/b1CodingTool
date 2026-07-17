@@ -87,11 +87,35 @@ class AgentTranslator:
         (self.project_dir / "CLAUDE.local.md").write_text("".join(local_parts), encoding="utf-8")
         console.print("[green]✔ Generated:[/green] CLAUDE.md, CLAUDE.local.md, .claude/context/")
 
+    # ---- Codex / Antigravity (personal + proprietary vehicles) ----
+
+    def _render_personal_vehicle(self, compiled: CompiledContext, out_path: Path, title: str):
+        personal = compiled.filter(visibility=PERSONAL, eager=True)
+        proprietary_lazy = compiled.filter(visibility=PROPRIETARY, eager=False)
+        proprietary_eager = compiled.filter(visibility=PROPRIETARY, eager=True)
+        if not personal and not proprietary_lazy and not proprietary_eager:
+            if out_path.exists():
+                out_path.unlink()
+            return
+        parts = [HEADER, f"# {title}\n"]
+        for item in personal:
+            parts.append("\n" + self._inline_block(item))
+        for item in proprietary_eager:
+            parts.append("\n" + self._inline_block(item))
+        if proprietary_lazy:
+            parts.append("\n## Proprietary reference (read on demand)\n\n")
+            parts.extend(self._pointer_line(i) + "\n" for i in proprietary_lazy)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text("".join(parts), encoding="utf-8")
+        console.print(f"[green]✔ Generated:[/green] {out_path.relative_to(self.project_dir)}")
+
     def render_codex(self, compiled: CompiledContext):
-        raise NotImplementedError  # implemented in Task 5
+        self._render_personal_vehicle(
+            compiled, self.project_dir / "AGENTS.override.md", "AGENTS.override.md (personal)")
 
     def render_antigravity(self, compiled: CompiledContext):
-        raise NotImplementedError  # implemented in Task 5
+        self._render_personal_vehicle(
+            compiled, self.project_dir / ".agents" / "rules" / "local.md", "Local rules (personal)")
 
     def _ensure_gitignore(self):
         gitignore = self.project_dir / ".gitignore"
