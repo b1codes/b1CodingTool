@@ -62,6 +62,12 @@ class AgentTranslator:
         for item in compiled.filter(visibility=SHARED, eager=True):
             parts.append("\n" + self._inline_block(item))
 
+        # Eager proprietary items are safe to inline here too: CLAUDE.md is
+        # gitignored, so this never reaches committed/shared files (unlike
+        # AGENTS.md, which must exclude proprietary content).
+        for item in compiled.filter(visibility=PROPRIETARY, eager=True):
+            parts.append("\n" + self._inline_block(item))
+
         # All lazy items (public + proprietary) -> copies in gitignored .claude/context,
         # linked as a filemap. .claude/ is gitignored so proprietary content is safe here.
         lazy = [i for i in compiled.items if not i.eager and i.visibility in (SHARED, PROPRIETARY)]

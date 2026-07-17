@@ -34,3 +34,27 @@ def test_claude_inlines_shared_eager_and_personal_goes_to_local(tmp_path):
     assert "Sandbox" not in claude                                     # not in shared CLAUDE.md
     # proprietary lazy content is allowed in gitignored .claude/ filemap
     assert (tmp_path / ".claude" / "context").is_dir()
+    # collision fixture: two lazy items share basename "a.md" (react-web vs llc-react)
+    # but must land as distinct files in the filemap, not overwrite each other.
+    file_a = (tmp_path / ".claude" / "context" / "000_a.md")
+    file_b = (tmp_path / ".claude" / "context" / "001_a.md")
+    assert file_a.exists() and file_b.exists()
+    assert file_a.read_text(encoding="utf-8") != file_b.read_text(encoding="utf-8")
+
+
+def test_claude_includes_proprietary_eager_but_root_excludes_it(tmp_path):
+    compiled = CompiledContext([
+        ContextItem("Project Context", "Never call prod API in tests.",
+                    ".agents/project/AGENTS.md", eager=True, visibility=SHARED),
+        ContextItem("llc-react Capabilities", "Use /llc-widget for glass UI",
+                    "", eager=True, visibility=PROPRIETARY),
+    ])
+    translator = AgentTranslator(tmp_path)
+    translator.render_claude(compiled)
+    translator.render_root_agents(compiled)
+
+    claude = (tmp_path / "CLAUDE.md").read_text(encoding="utf-8")
+    root = (tmp_path / "AGENTS.md").read_text(encoding="utf-8")
+
+    assert "Use /llc-widget for glass UI" in claude                    # proprietary eager inlined into CLAUDE.md
+    assert "Use /llc-widget for glass UI" not in root                  # excluded from root AGENTS.md
