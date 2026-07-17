@@ -62,9 +62,11 @@ def setup_context(root_dir: Path):
             existing_project = ""
             if case_sensitive_exists(project_agent_path):
                 existing_project = project_agent_path.read_text(encoding="utf-8")
-            merged = (existing_project.rstrip() + "\n\n" + root_content.strip() + "\n").lstrip()
-            project_agent_path.write_text(merged, encoding="utf-8")
-            console.print("[yellow]Migrated existing root AGENTS.md content into .agents/project/AGENTS.md.[/yellow]")
+            already_migrated = root_content.strip() in existing_project
+            if not already_migrated:
+                merged = (existing_project.rstrip() + "\n\n" + root_content.strip() + "\n").lstrip()
+                project_agent_path.write_text(merged, encoding="utf-8")
+                console.print("[yellow]Migrated existing root AGENTS.md content into .agents/project/AGENTS.md.[/yellow]")
 
     if not case_sensitive_exists(project_agent_path):
         project_agent_path.write_text(PROJECT_AGENT_MD, encoding="utf-8")

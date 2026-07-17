@@ -94,3 +94,13 @@ def test_migrates_existing_root_content_into_project_seed(tmp_path):
     project_seed = (tmp_path / ".agents" / "project" / "AGENTS.md").read_text(encoding="utf-8")
     assert "Never hardcode secrets." in project_seed
 
+
+def test_migration_is_idempotent(tmp_path):
+    (tmp_path / ".agents").mkdir()
+    # user already had authored root content (no b1 marker)
+    (tmp_path / "AGENTS.md").write_text("# My Rules\nNever hardcode secrets.", encoding="utf-8")
+    setup_context(tmp_path)
+    setup_context(tmp_path)
+    project_seed = (tmp_path / ".agents" / "project" / "AGENTS.md").read_text(encoding="utf-8")
+    assert project_seed.count("Never hardcode secrets.") == 1
+
