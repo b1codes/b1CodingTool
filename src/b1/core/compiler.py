@@ -15,6 +15,20 @@ class ContextCompiler:
         self.config = config
 
     def compile(self) -> CompiledContext:
+        """
+        Build the structured project context from source files.
+
+        Reads `.agents/project/AGENTS.md` (eager, SHARED), `.agents/local/AGENTS.md`
+        (eager, PERSONAL), configured GitHub metadata (eager, SHARED), and each
+        installed module under `.agents/modules/*` — module capabilities are eager
+        pointers and each `context/*.md` file is a lazy pointer, with visibility
+        (SHARED vs PROPRIETARY) determined by the module's `proprietary` flag.
+
+        Root `AGENTS.md` is NEVER read here: it is a generated OUTPUT produced from
+        this compiled context (by the translator), not a source of it.
+
+        Returns a `CompiledContext` (a list of typed `ContextItem`s), not a string.
+        """
         items: List[ContextItem] = []
 
         # 0. GitHub metadata (eager, shared)
@@ -71,6 +85,10 @@ class ContextCompiler:
                 mod_config = ModuleConfig.from_yaml(config_path)
                 visibility = PROPRIETARY if mod_config.proprietary else SHARED
             except Exception as e:
+                # Fail-safe: an unreadable/unknown manifest must never be treated as
+                # SHARED — assume the worst (PROPRIETARY) so broken metadata can't
+                # leak module content into committed/shared outputs.
+                visibility = PROPRIETARY
                 console.print(f"[yellow]Warning: Could not load config for module {mod.name}: {e}[/yellow]")
 
         # Capabilities (commands/skills) -> eager
