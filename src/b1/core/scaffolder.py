@@ -9,8 +9,13 @@ __pycache__/
 .venv/
 .env
 
-# b1CodingTool
-# Add any temp directories here
+# b1CodingTool generated agent files
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.override.md
+.claude/
+.agents/local/
+.agents/rules/local.md
 """
 
 README_CONTENT = """# b1CodingTool Project

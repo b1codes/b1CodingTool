@@ -46,3 +46,11 @@ def test_safe_to_call_twice(tmp_path):
     scaffold_project(tmp_path)
     scaffold_project(tmp_path)  # should not raise
     assert (tmp_path / ".agents").is_dir()
+
+
+def test_gitignore_has_generated_entries(tmp_path):
+    scaffold_project(tmp_path)
+    gitignore = (tmp_path / ".gitignore").read_text(encoding="utf-8")
+    for entry in ["CLAUDE.md", "CLAUDE.local.md", "AGENTS.override.md",
+                  ".claude/", ".agents/local/", ".agents/rules/local.md"]:
+        assert entry in gitignore

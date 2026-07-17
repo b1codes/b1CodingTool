@@ -25,10 +25,18 @@ def test_init_creates_docs_directory(tmp_path, monkeypatch):
     assert (tmp_path / "docs").is_dir()
 
 
-def test_init_creates_agent_md(tmp_path, monkeypatch):
+def test_init_does_not_create_root_agent_md(tmp_path, monkeypatch):
+    # Root AGENTS.md is a generated OUTPUT owned by `b1 pair` / the translator,
+    # not authored by `b1 init`.
     monkeypatch.chdir(tmp_path)
     runner.invoke(app, ["init"])
-    assert case_sensitive_exists(tmp_path / "AGENTS.md")
+    assert not case_sensitive_exists(tmp_path / "AGENTS.md")
+
+
+def test_init_creates_local_agent_md(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    runner.invoke(app, ["init"])
+    assert case_sensitive_exists(tmp_path / ".agents" / "local" / "AGENTS.md")
 
 
 def test_init_creates_project_agent_md(tmp_path, monkeypatch):

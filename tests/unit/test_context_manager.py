@@ -7,23 +7,22 @@ def _agent_dir(root: Path) -> Path:
     return root / ".agents" / "project"
 
 
-def test_creates_root_agent_md_when_missing(tmp_path):
+def test_does_not_create_root_agent_md_when_missing(tmp_path):
+    # Root AGENTS.md is now a generated OUTPUT (owned by the translator), not
+    # authored by setup_context. If none exists, none should be created here.
     setup_context(tmp_path)
-    assert (tmp_path / "AGENTS.md").exists()
+    assert not (tmp_path / "AGENTS.md").exists()
 
 
-def test_root_agent_md_contains_b1_marker(tmp_path):
-    setup_context(tmp_path)
-    content = (tmp_path / "AGENTS.md").read_text(encoding="utf-8")
-    assert "b1CodingTool" in content
-
-
-def test_appends_to_existing_agent_md_without_marker(tmp_path):
+def test_migrates_content_from_existing_root_agent_md_without_marker(tmp_path):
     (tmp_path / "AGENTS.md").write_text("# Existing content\n", encoding="utf-8")
     setup_context(tmp_path)
-    content = (tmp_path / "AGENTS.md").read_text(encoding="utf-8")
-    assert "Existing content" in content
-    assert "b1CodingTool" in content
+    # Root file is left untouched for the translator to regenerate later.
+    root_content = (tmp_path / "AGENTS.md").read_text(encoding="utf-8")
+    assert root_content == "# Existing content\n"
+    # ...but its content is preserved by migrating it into the project seed.
+    project_content = (tmp_path / ".agents" / "project" / "AGENTS.md").read_text(encoding="utf-8")
+    assert "Existing content" in project_content
 
 
 def test_does_not_modify_agent_md_with_marker_already_present(tmp_path):
@@ -77,4 +76,21 @@ def test_migrates_lowercase_agents_md_to_uppercase(tmp_path):
     
     assert "root context" in (tmp_path / "AGENTS.md").read_text(encoding="utf-8")
     assert "project context" in (proj_dir / "AGENTS.md").read_text(encoding="utf-8")
+
+
+def test_creates_local_seed(tmp_path):
+    (tmp_path / ".agents").mkdir()
+    setup_context(tmp_path)
+    local_seed = tmp_path / ".agents" / "local" / "AGENTS.md"
+    assert local_seed.exists()
+    assert "b1CodingTool" in local_seed.read_text(encoding="utf-8")
+
+
+def test_migrates_existing_root_content_into_project_seed(tmp_path):
+    (tmp_path / ".agents").mkdir()
+    # user already had authored root content (no b1 marker)
+    (tmp_path / "AGENTS.md").write_text("# My Rules\nNever hardcode secrets.", encoding="utf-8")
+    setup_context(tmp_path)
+    project_seed = (tmp_path / ".agents" / "project" / "AGENTS.md").read_text(encoding="utf-8")
+    assert "Never hardcode secrets." in project_seed
 
