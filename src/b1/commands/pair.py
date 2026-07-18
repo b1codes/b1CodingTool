@@ -1,5 +1,5 @@
 import typer
-from typing import Annotated
+from typing import Annotated, Optional
 from pathlib import Path
 from rich.console import Console
 
@@ -13,6 +13,24 @@ console = Console()
 FULL_MATRIX = ["CLAUDE", "CODEX", "ANTIGRAVITY"]
 
 
+def run_pair(project_dir: Path, agents: list[str], config: Optional[B1Config] = None) -> bool:
+    """Non-interactive compile -> translate core. Returns True if files were generated,
+    False if there was no context to compile. No prompts, no agent-resolution."""
+    if config is None:
+        config = B1Config.load(project_dir)
+    hook_engine = HookEngine(project_dir)
+    compiler = ContextCompiler(project_dir, config=config)
+    translator = AgentTranslator(project_dir)
+
+    hook_engine.run_hooks("pre-pair")
+    compiled = compiler.compile()
+    if compiled.is_empty():
+        return False
+    translator.generate_files(agents, compiled)
+    hook_engine.run_hooks("post-pair")
+    return True
+
+
 def pair_cmd(
     sync: Annotated[bool, typer.Option("--sync", help="Regenerate the full agent matrix (Claude, Codex, Antigravity) regardless of active_agents.")] = False,
 ):
@@ -23,7 +41,6 @@ def pair_cmd(
         raise typer.Exit(1)
 
     config = B1Config.load(project_dir)
-    hook_engine = HookEngine(project_dir)
 
     if sync:
         agents = FULL_MATRIX
@@ -39,16 +56,9 @@ def pair_cmd(
         else:
             agents = config.active_agents
 
-    compiler = ContextCompiler(project_dir, config=config)
-    translator = AgentTranslator(project_dir)
-
     console.print("[bold blue]Compiling contexts...[/bold blue]")
-    hook_engine.run_hooks("pre-pair")
-    compiled = compiler.compile()
-    if compiled.is_empty():
+    if not run_pair(project_dir, agents, config=config):
         console.print("[yellow]No context found to compile.[/yellow]")
         return
     console.print(f"[blue]Writing configurations for:[/blue] {', '.join(agents)}")
-    translator.generate_files(agents, compiled)
-    hook_engine.run_hooks("post-pair")
     console.print("\n[bold green]Cross-agent parity synchronization complete![/bold green] \U0001f504")

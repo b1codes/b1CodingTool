@@ -82,3 +82,19 @@ def test_pair_sync_generates_full_matrix(make_project):
     assert (project / "AGENTS.override.md").exists()        # Codex personal (has local content)
     assert (project / ".agents" / "rules" / "local.md").exists()  # Antigravity personal
     assert "Never push to main." in (project / "AGENTS.md").read_text(encoding="utf-8")
+
+
+def test_run_pair_generates_without_prompting(make_project):
+    from b1.commands.pair import run_pair
+    project = make_project(agents=["CLAUDE"])
+    (project / ".agents" / "project" / "AGENTS.md").write_text("# P\nrule one", encoding="utf-8")
+    ok = run_pair(project, ["CLAUDE", "CODEX", "ANTIGRAVITY"])
+    assert ok is True
+    assert (project / "AGENTS.md").exists()
+    assert (project / "CLAUDE.md").exists()
+
+
+def test_run_pair_returns_false_when_empty(tmp_path):
+    from b1.commands.pair import run_pair
+    (tmp_path / ".agents").mkdir()
+    assert run_pair(tmp_path, ["CLAUDE"]) is False
