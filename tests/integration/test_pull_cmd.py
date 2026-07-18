@@ -68,3 +68,15 @@ def test_pull_offers_repair_and_runs_it_on_yes(make_project):
         os.chdir(cwd)
     assert result.exit_code == 0
     mock_pair.assert_called_once()
+
+
+def test_pull_exits_zero_when_no_input(make_project, monkeypatch):
+    """Simulates non-interactive/EOF stdin (no input= given): the re-pair
+    confirm prompt should be treated as "no" instead of raising click.Abort
+    and exiting 1."""
+    project = make_project()
+    monkeypatch.chdir(project)
+    with patch("b1.commands.pull.pair_cmd") as mock_pair:
+        result = runner.invoke(app, ["pull"])
+    assert result.exit_code == 0
+    mock_pair.assert_not_called()

@@ -1,3 +1,4 @@
+import click
 import typer
 from pathlib import Path
 from rich.console import Console
@@ -54,5 +55,9 @@ def pull_cmd():
 
             console.print("\\n[bold green]Pull sync complete![/bold green]")
 
-    if typer.confirm("Re-pair now to apply updates?", default=False):
+    try:
+        do_repair = typer.confirm("Re-pair now to apply updates?", default=False)
+    except click.Abort:
+        do_repair = False
+    if do_repair:
         pair_cmd(sync=False)
