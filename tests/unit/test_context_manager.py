@@ -104,3 +104,11 @@ def test_migration_is_idempotent(tmp_path):
     project_seed = (tmp_path / ".agents" / "project" / "AGENTS.md").read_text(encoding="utf-8")
     assert project_seed.count("Never hardcode secrets.") == 1
 
+
+def test_project_seed_has_note_headings(tmp_path):
+    from b1.core.context_manager import setup_context
+    (tmp_path / ".agents").mkdir()
+    setup_context(tmp_path)
+    seed = (tmp_path / ".agents" / "project" / "AGENTS.md").read_text(encoding="utf-8")
+    assert "## Guardrails" in seed and "## Edge cases" in seed
+
