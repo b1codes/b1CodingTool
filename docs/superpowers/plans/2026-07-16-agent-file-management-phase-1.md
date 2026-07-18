@@ -980,6 +980,108 @@ git commit -m "feat(pull): offer optional re-pair after fetching module updates"
 
 ---
 
+### Task 8: Update `server/main.py` to the CompiledContext pipeline
+
+*(Added during execution — the FastAPI dashboard server consumes `compile()` + `generate_files()` exactly like `pair.py`, but was missed in the original plan. Without it, `test_server.py` stays red.)*
+
+**Files:**
+- Modify: `src/b1/core/compiled.py` (add `render_preview`)
+- Modify: `src/b1/server/main.py:130-137` (`get_compiled_context`)
+- Modify: `tests/integration/test_server.py` (3 GEMINI-shaped tests)
+- Modify: `tests/conftest.py` (`make_project` default `active_agents`)
+- Test: `tests/unit/test_compiled.py` (add `render_preview` test)
+
+**Interfaces:**
+- Consumes: `ContextCompiler.compile() -> CompiledContext`; `AgentTranslator.generate_files(agents, compiled)` (already works — `pair_context` needs no logic change).
+- Produces: `CompiledContext.render_preview() -> str`.
+
+**Why a string preview:** the `/api/context` endpoint and the React dashboard expect `{"content": <str>}`. `compile()` now returns a structured `CompiledContext`, which is not JSON-serializable and not a string. Rendering a plain-text preview of all items keeps the endpoint contract and the dashboard unchanged. The dashboard is a local developer tool, so the preview may include all visibilities.
+
+- [ ] **Step 1: Write the failing test for `render_preview`**
+
+```python
+# tests/unit/test_compiled.py  (append)
+def test_render_preview_is_string_covering_all_items():
+    from b1.core.compiled import ContextItem, CompiledContext, SHARED, PERSONAL
+    ctx = CompiledContext([
+        ContextItem("Project", "never push to main", ".agents/project/AGENTS.md", eager=True, visibility=SHARED),
+        ContextItem("react-web", "docs", ".agents/modules/react-web/context/a.md", eager=False, visibility=SHARED),
+        ContextItem("Local", "my token", ".agents/local/AGENTS.md", eager=True, visibility=PERSONAL),
+    ])
+    preview = ctx.render_preview()
+    assert isinstance(preview, str)
+    assert "never push to main" in preview                      # eager body inlined
+    assert ".agents/modules/react-web/context/a.md" in preview  # lazy shown as reference
+    assert "my token" in preview                                # all visibilities included
+```
+
+- [ ] **Step 2: Run it to verify it fails**
+
+Run: `uv run pytest tests/unit/test_compiled.py::test_render_preview_is_string_covering_all_items -v`
+Expected: FAIL with `AttributeError: 'CompiledContext' object has no attribute 'render_preview'`
+
+- [ ] **Step 3: Implement `render_preview`**
+
+Add to `CompiledContext` in `src/b1/core/compiled.py`:
+
+```python
+    def render_preview(self) -> str:
+        """Plain-text preview of all compiled items (for the dashboard /api/context endpoint)."""
+        blocks = []
+        for item in self.items:
+            tag = "eager" if item.eager else "lazy"
+            head = f"## {item.title} [{item.visibility}, {tag}]"
+            if item.eager:
+                blocks.append(f"{head}\n\n{item.body}\n")
+            else:
+                blocks.append(f"{head}\n\n(reference: {item.source_path or item.title})\n")
+        return "\n".join(blocks)
+```
+
+- [ ] **Step 4: Run it to verify it passes**
+
+Run: `uv run pytest tests/unit/test_compiled.py -v`
+Expected: PASS
+
+- [ ] **Step 5: Update `get_compiled_context`**
+
+In `src/b1/server/main.py`, change the return of `get_compiled_context` (line 137) from:
+
+```python
+    return {"content": compiler.compile()}
+```
+to:
+```python
+    return {"content": compiler.compile().render_preview()}
+```
+
+Leave `pair_context` unchanged — `generate_files(config.active_agents, compiler.compile())` already accepts a `CompiledContext`.
+
+- [ ] **Step 6: Update the GEMINI-shaped `test_server.py` tests**
+
+In `tests/integration/test_server.py`:
+- `test_pair_context_generates_agent_files`: change the configured agents from `["GEMINI", "CLAUDE"]` to `["CLAUDE"]`; replace `assert (cd_project / "GEMINI.md").exists()` with `assert not (cd_project / "GEMINI.md").exists()`; keep `assert (cd_project / "CLAUDE.md").exists()`.
+- `test_pair_context_updates_active_agents_if_provided`: change `{"agents": ["GEMINI"]}` to `{"agents": ["CLAUDE"]}`; replace `assert (cd_project / "GEMINI.md").exists()` with `assert (cd_project / "CLAUDE.md").exists()`; update the config assertion to `== ["CLAUDE"]`.
+- `test_get_context_returns_compiled_content`: keep the `isinstance(data["content"], str)` assertion (now satisfied by `render_preview`); additionally assert the project context text appears: `assert "Project-specific context" in data["content"]` (that string is what the `make_project` fixture writes into `.agents/project/AGENTS.md`).
+
+- [ ] **Step 7: Drop GEMINI from the fixture default**
+
+In `tests/conftest.py`, change `make_project`'s `active_agents` default from `agents or ["CLAUDE", "GEMINI"]` to `agents or ["CLAUDE"]`. Update the docstring example on the same fixture that shows `agents=["CLAUDE", "GEMINI"]` to `agents=["CLAUDE"]`.
+
+- [ ] **Step 8: Run the full suite**
+
+Run: `uv run pytest -q`
+Expected: PASS — 0 failures. This is the task that makes the whole branch green.
+
+- [ ] **Step 9: Commit**
+
+```bash
+git add src/b1/core/compiled.py src/b1/server/main.py tests/integration/test_server.py tests/conftest.py tests/unit/test_compiled.py
+git commit -m "feat(server): render CompiledContext preview for /api/context; retire GEMINI from tests"
+```
+
+---
+
 ## Subsequent Phases (own plans after Phase 1 lands)
 
 - **Phase 2 — Slash commands:** `b1 rule` (centerpiece) and `b1 edge-case` CLI subcommands writing to `.agents/project/AGENTS.md` or `.agents/local/AGENTS.md` (scope param; edge-case prompts when omitted), plus per-agent shims (`.claude/commands/`, Antigravity `.agents/skills/`; Codex = CLI fallback / Skill shim TBD). Each ends by invoking the compile.
