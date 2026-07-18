@@ -56,6 +56,7 @@ def make_project(tmp_path):
         # .agents/ structure
         (project_dir / ".agents" / "project").mkdir(parents=True)
         (project_dir / ".agents" / "modules").mkdir(parents=True)
+        (project_dir / ".agents" / "local").mkdir(parents=True, exist_ok=True)
 
         # AGENTS.md files
         (project_dir / "AGENTS.md").write_text(
