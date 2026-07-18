@@ -31,3 +31,17 @@ def test_filter_combined():
 def test_is_empty():
     assert CompiledContext([]).is_empty() is True
     assert CompiledContext(_items()).is_empty() is False
+
+
+def test_render_preview_is_string_covering_all_items():
+    from b1.core.compiled import ContextItem, CompiledContext, SHARED, PERSONAL
+    ctx = CompiledContext([
+        ContextItem("Project", "never push to main", ".agents/project/AGENTS.md", eager=True, visibility=SHARED),
+        ContextItem("react-web", "docs", ".agents/modules/react-web/context/a.md", eager=False, visibility=SHARED),
+        ContextItem("Local", "my token", ".agents/local/AGENTS.md", eager=True, visibility=PERSONAL),
+    ])
+    preview = ctx.render_preview()
+    assert isinstance(preview, str)
+    assert "never push to main" in preview                      # eager body inlined
+    assert ".agents/modules/react-web/context/a.md" in preview  # lazy shown as reference
+    assert "my token" in preview                                # all visibilities included

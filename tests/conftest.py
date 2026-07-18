@@ -47,7 +47,7 @@ def make_project(tmp_path):
     Usage:
         project = make_project()
         project = make_project(modules=["django"])
-        project = make_project(agents=["CLAUDE", "GEMINI"], upstream_repo="org/repo")
+        project = make_project(agents=["CLAUDE"], upstream_repo="org/repo")
     """
     def _make(agents=None, upstream_repo=None, modules=None):
         project_dir = tmp_path / "project"
@@ -71,7 +71,7 @@ def make_project(tmp_path):
         # config.yaml
         config_data = {
             "upstream_repo": upstream_repo or "",
-            "active_agents": agents or ["CLAUDE", "GEMINI"],
+            "active_agents": agents or ["CLAUDE"],
         }
         (project_dir / ".agents" / "config.yaml").write_text(
             yaml.dump(config_data), encoding="utf-8"

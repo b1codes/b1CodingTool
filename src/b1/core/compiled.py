@@ -36,3 +36,15 @@ class CompiledContext:
 
     def is_empty(self) -> bool:
         return not self.items
+
+    def render_preview(self) -> str:
+        """Plain-text preview of all compiled items (for the dashboard /api/context endpoint)."""
+        blocks = []
+        for item in self.items:
+            tag = "eager" if item.eager else "lazy"
+            head = f"## {item.title} [{item.visibility}, {tag}]"
+            if item.eager:
+                blocks.append(f"{head}\n\n{item.body}\n")
+            else:
+                blocks.append(f"{head}\n\n(reference: {item.source_path or item.title})\n")
+        return "\n".join(blocks)

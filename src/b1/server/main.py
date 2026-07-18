@@ -134,7 +134,7 @@ def get_compiled_context():
     
     config = B1Config.load(project_dir)
     compiler = ContextCompiler(project_dir, config=config)
-    return {"content": compiler.compile()}
+    return {"content": compiler.compile().render_preview()}
 
 @app.post("/api/context/pair")
 def pair_context(req: Optional[PairRequest] = None):

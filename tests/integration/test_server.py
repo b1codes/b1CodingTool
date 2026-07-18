@@ -51,6 +51,7 @@ def test_get_context_returns_compiled_content(client):
     data = resp.json()
     assert "content" in data
     assert isinstance(data["content"], str)
+    assert "Project-specific context" in data["content"]
 
 
 def test_get_context_returns_400_when_not_initialized(tmp_path, monkeypatch):
@@ -96,19 +97,19 @@ def test_install_module_fetches_and_installs(client, cd_project, tmp_path):
 
 def test_pair_context_generates_agent_files(client, cd_project):
     # Configure agents first
-    client.put("/api/config", json={"active_agents": ["GEMINI", "CLAUDE"]})
-    
+    client.put("/api/config", json={"active_agents": ["CLAUDE"]})
+
     resp = client.post("/api/context/pair")
     assert resp.status_code == 200
-    assert (cd_project / "GEMINI.md").exists()
+    assert not (cd_project / "GEMINI.md").exists()
     assert (cd_project / "CLAUDE.md").exists()
 
 
 def test_pair_context_updates_active_agents_if_provided(client, cd_project):
-    resp = client.post("/api/context/pair", json={"agents": ["GEMINI"]})
+    resp = client.post("/api/context/pair", json={"agents": ["CLAUDE"]})
     assert resp.status_code == 200
-    assert (cd_project / "GEMINI.md").exists()
-    
+    assert (cd_project / "CLAUDE.md").exists()
+
     # Verify config was updated
     resp_config = client.get("/api/config")
-    assert resp_config.json()["active_agents"] == ["GEMINI"]
+    assert resp_config.json()["active_agents"] == ["CLAUDE"]
