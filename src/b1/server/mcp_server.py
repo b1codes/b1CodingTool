@@ -74,11 +74,11 @@ def b1_pair() -> str:
     compiler = ContextCompiler(project_dir, config=config)
     translator = AgentTranslator(project_dir)
     
-    compiled_text = compiler.compile()
-    if not compiled_text:
+    compiled = compiler.compile()
+    if compiled.is_empty():
         return "No context found to compile."
-        
-    translator.generate_files(config.active_agents, compiled_text)
+
+    translator.generate_files(config.active_agents, compiled)
     return f"Parity synchronization complete for: {', '.join(config.active_agents)}"
 
 @mcp.tool()
@@ -174,7 +174,7 @@ def get_compiled_context() -> str:
     project_dir = Path.cwd()
     config = B1Config.load(project_dir)
     compiler = ContextCompiler(project_dir, config=config)
-    return compiler.compile()
+    return compiler.compile().render_preview()
 
 @mcp.resource("b1://config/project")
 def get_project_config() -> str:
