@@ -1,3 +1,4 @@
+import click
 import typer
 from typing import Optional, Annotated
 from pathlib import Path
@@ -21,7 +22,10 @@ def edge_case_cmd(
         raise typer.Exit(1)
 
     if scope is None:
-        scope = typer.prompt("Scope? (project = team, local = personal)", default="project")
+        try:
+            scope = typer.prompt("Scope? (project = team, local = personal)", default="project")
+        except click.Abort:
+            scope = "project"
     if scope not in ("project", "local"):
         console.print("[bold red]--scope must be 'project' or 'local'.[/bold red]")
         raise typer.Exit(1)

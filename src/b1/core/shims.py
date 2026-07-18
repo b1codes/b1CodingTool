@@ -17,10 +17,10 @@ concise line (for example: "The integration tests require a local Redis instance
 
 Then record it by running:
 
-    b1 edge-case "<the edge case>"
+    b1 edge-case "<the edge case>" --scope project
 
-You will be asked whether it is a team (project) or personal (local) note if you do \
-not pass `--scope`. After it runs, confirm where it was saved.
+Use `--scope local` instead if the edge case is personal to you rather than the \
+whole team. After it runs, confirm where it was saved.
 """
 
 _SHIMS = {

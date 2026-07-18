@@ -24,11 +24,16 @@ def append_note(project_dir: Path, kind: str, text: str, scope: str) -> tuple[Pa
     bullet = f"- {text.strip()}"
 
     lines = content.splitlines()
-    if bullet in lines:
-        return dest, False
 
     if heading in lines:
         idx = lines.index(heading)
+        end = len(lines)
+        for j in range(idx + 1, len(lines)):
+            if lines[j].startswith("## "):
+                end = j
+                break
+        if bullet in lines[idx + 1:end]:
+            return dest, False
         # insert the bullet on the line directly after the heading (newest-first)
         lines.insert(idx + 1, bullet)
         new_content = "\n".join(lines) + "\n"

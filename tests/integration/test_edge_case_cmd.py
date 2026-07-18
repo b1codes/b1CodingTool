@@ -28,3 +28,12 @@ def test_edge_case_prompts_for_scope_when_omitted(make_project):
     result = _run(project, ["edge-case", "Flaky on ARM"], input="local\n")
     assert result.exit_code == 0
     assert "- Flaky on ARM" in (project / ".agents" / "local" / "AGENTS.md").read_text(encoding="utf-8")
+
+
+def test_edge_case_defaults_to_project_without_input(make_project):
+    project = make_project(agents=["CLAUDE"])
+    # No input= provided: simulates a non-interactive (slash-command shim) invocation,
+    # where stdin is not a TTY and typer.prompt hits EOF -> click.Abort.
+    result = _run(project, ["edge-case", "No TTY here"])
+    assert result.exit_code == 0
+    assert "- No TTY here" in (project / ".agents" / "project" / "AGENTS.md").read_text(encoding="utf-8")

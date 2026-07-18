@@ -1,5 +1,5 @@
 import typer
-from typing import Optional, Annotated
+from typing import Annotated
 from pathlib import Path
 from rich.console import Console
 

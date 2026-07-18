@@ -42,3 +42,18 @@ def test_dedup_exact_duplicate(tmp_path):
     dest, appended = append_note(tmp_path, "rule", "No force push", "project")
     assert appended is False
     assert dest.read_text(encoding="utf-8").count("- No force push") == 1
+
+
+def test_dedup_is_section_scoped(tmp_path):
+    _mk(tmp_path)
+    same_text = "Follow the guidelines specified in the root AGENTS.md."
+    # Seed the SAME bullet text under a DIFFERENT heading (Edge cases).
+    dest, appended = append_note(tmp_path, "edge-case", same_text, "project")
+    assert appended is True
+    # Adding it as a rule (Guardrails) should NOT be treated as a duplicate,
+    # since dedup must be scoped to the target heading's section only.
+    dest, appended = append_note(tmp_path, "rule", same_text, "project")
+    assert appended is True
+    body = dest.read_text(encoding="utf-8")
+    guardrails_section = body.split("## Guardrails", 1)[1].split("## Edge cases", 1)[0]
+    assert f"- {same_text}" in guardrails_section
