@@ -16,6 +16,8 @@ AGENTS.override.md
 .claude/
 .agents/local/
 .agents/rules/local.md
+.agents/skills/b1-rule.md
+.agents/skills/b1-edge-case.md
 """
 
 README_CONTENT = """# b1CodingTool Project

@@ -3,6 +3,7 @@ from pathlib import Path
 from rich.console import Console
 
 from b1.core.compiled import CompiledContext, ContextItem, SHARED, PERSONAL, PROPRIETARY
+from b1.core.shims import write_agent_shims
 
 console = Console()
 
@@ -20,12 +21,12 @@ class AgentTranslator:
         upper = {a.upper() for a in agents}
         if "CLAUDE" in upper:
             self.render_claude(compiled)
-        # Codex + Antigravity renderers are added in Task 5.
         if "CODEX" in upper:
             self.render_codex(compiled)
         if "ANTIGRAVITY" in upper:
             self.render_antigravity(compiled)
 
+        write_agent_shims(self.project_dir)
         self._ensure_gitignore()
 
     # ---- helpers ----
@@ -120,7 +121,8 @@ class AgentTranslator:
     def _ensure_gitignore(self):
         gitignore = self.project_dir / ".gitignore"
         entries = ["CLAUDE.md", "CLAUDE.local.md", "AGENTS.override.md",
-                   ".claude/", ".agents/local/", ".agents/rules/local.md"]
+                   ".claude/", ".agents/local/", ".agents/rules/local.md",
+                   ".agents/skills/b1-rule.md", ".agents/skills/b1-edge-case.md"]
         existing = gitignore.read_text(encoding="utf-8").splitlines() if gitignore.exists() else []
         missing = [e for e in entries if e not in existing]
         if missing:
