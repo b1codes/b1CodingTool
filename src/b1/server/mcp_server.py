@@ -9,9 +9,10 @@ from b1.core.fetcher import ModuleFetcher
 from b1.core.installer import ModuleInstaller
 from b1.core.compiler import ContextCompiler
 from b1.core.config import B1Config
-from b1.core.translator import AgentTranslator
+from b1.core.exceptions import DriftError
 from b1.commands.link_github import run_link_github
 from b1.commands.link_clickup import run_link_clickup
+from b1.commands.pair import run_pair
 
 # Initialize FastMCP
 mcp = FastMCP("b1")
@@ -71,14 +72,18 @@ def b1_pair() -> str:
         config.active_agents = ["CLAUDE", "CODEX", "ANTIGRAVITY"]
         config.save(project_dir)
         
-    compiler = ContextCompiler(project_dir, config=config)
-    translator = AgentTranslator(project_dir)
-    
-    compiled = compiler.compile()
-    if compiled.is_empty():
+    try:
+        generated = run_pair(project_dir, config.active_agents, config=config)
+    except DriftError as e:
+        names = ", ".join(str(f.relative_to(project_dir)) for f in e.files)
+        return (
+            f"Hand-edited generated files detected: {names}. "
+            "Run `b1 reconcile` to resolve, then retry."
+        )
+
+    if generated is False:
         return "No context found to compile."
 
-    translator.generate_files(config.active_agents, compiled)
     return f"Parity synchronization complete for: {', '.join(config.active_agents)}"
 
 @mcp.tool()

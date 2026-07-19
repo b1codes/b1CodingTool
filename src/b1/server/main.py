@@ -8,13 +8,12 @@ from pydantic import BaseModel
 
 from b1.core.config import B1Config
 from b1.core.compiler import ContextCompiler
-from b1.core.translator import AgentTranslator
-from b1.core.hook_engine import HookEngine
 from b1.core.fetcher import ModuleFetcher
 from b1.core.installer import ModuleInstaller
 from b1.core.scaffolder import scaffold_project
 from b1.core.context_manager import setup_context
-from b1.core.exceptions import B1Error, ProjectError, ValidationError
+from b1.core.exceptions import B1Error, ProjectError, ValidationError, DriftError
+from b1.commands.pair import run_pair
 
 app = FastAPI(title="b1CodingTool Dashboard API")
 
@@ -151,23 +150,19 @@ def pair_context(req: Optional[PairRequest] = None):
         
     if not config.active_agents:
         raise ProjectError("No active agents configured for pairing.")
-        
-    hook_engine = HookEngine(project_dir)
-    compiler = ContextCompiler(project_dir, config=config)
-    translator = AgentTranslator(project_dir)
-    
-    # 1. Pre-pair hooks
-    hook_engine.run_hooks("pre-pair")
-    
-    # 2. Compile
-    compiled_text = compiler.compile()
-    
-    # 3. Translate
-    translator.generate_files(config.active_agents, compiled_text)
-    
-    # 4. Post-pair hooks
-    hook_engine.run_hooks("post-pair")
-    
+
+    try:
+        run_pair(project_dir, config.active_agents, config=config)
+    except DriftError as e:
+        names = ", ".join(str(f.relative_to(project_dir)) for f in e.files)
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"Hand-edited generated files detected: {names}. "
+                "Run `b1 reconcile` to resolve, then retry."
+            ),
+        )
+
     return {"status": "success", "agents": config.active_agents}
 
 # Path to the React build artifacts

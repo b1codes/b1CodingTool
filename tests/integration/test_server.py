@@ -113,3 +113,43 @@ def test_pair_context_updates_active_agents_if_provided(client, cd_project):
     # Verify config was updated
     resp_config = client.get("/api/config")
     assert resp_config.json()["active_agents"] == ["CLAUDE"]
+
+
+def test_pair_context_records_snapshots_no_false_drift(client, cd_project):
+    """Regression: the server pair path used to bypass record_snapshots,
+    leaving the baseline stale. Simulate a pre-existing baseline (e.g. from
+    an earlier CLI pair), change the source so a regenerate legitimately
+    produces different output, then pair via the server: it must refresh
+    the snapshot to match, leaving check_drift() clean. Before the fix, the
+    server never records a snapshot, so the *old* baseline stays stale
+    against the newly regenerated file and check_drift() falsely reports
+    drift here (which would then falsely halt the next CLI `b1 pair`)."""
+    from b1.core.snapshots import check_drift
+    from b1.commands.pair import run_pair
+
+    run_pair(cd_project, ["CLAUDE"])  # seed an initial, matching baseline
+
+    (cd_project / ".agents" / "project" / "AGENTS.md").write_text(
+        "# Project\nchanged rule\n", encoding="utf-8"
+    )
+
+    resp = client.post("/api/context/pair", json={"agents": ["CLAUDE"]})
+    assert resp.status_code == 200
+    assert "changed rule" in (cd_project / "CLAUDE.md").read_text(encoding="utf-8")
+    assert check_drift(cd_project) == []
+
+
+def test_pair_context_halts_409_on_handedit(client, cd_project):
+    """Regression: the server pair path used to bypass check_drift and would
+    silently overwrite a hand-edit. It must now halt with 409 and point the
+    user at `b1 reconcile`."""
+    resp = client.post("/api/context/pair", json={"agents": ["CLAUDE"]})
+    assert resp.status_code == 200
+
+    (cd_project / "CLAUDE.md").write_text("hand edited\n", encoding="utf-8")
+
+    resp2 = client.post("/api/context/pair", json={"agents": ["CLAUDE"]})
+    assert resp2.status_code == 409
+    detail = resp2.json()["detail"]
+    assert "CLAUDE.md" in detail
+    assert "reconcile" in detail

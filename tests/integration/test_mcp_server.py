@@ -58,6 +58,48 @@ def test_b1_pair_default_agents_are_gemini_free(make_project, monkeypatch):
     assert "GEMINI" not in result
 
 
+def test_b1_pair_records_snapshots_no_false_drift(make_project, monkeypatch):
+    """Regression: b1_pair used to bypass record_snapshots, leaving the
+    baseline stale so a later CLI `b1 pair` falsely raised DriftError.
+    Seed a matching baseline, change the source so a regenerate legitimately
+    differs, then run b1_pair: it must refresh the snapshot to match."""
+    from b1.core.snapshots import check_drift
+    from b1.commands.pair import run_pair
+
+    project = make_project(agents=["CLAUDE"])
+    monkeypatch.chdir(project)
+
+    run_pair(project, ["CLAUDE"])  # seed an initial, matching baseline
+    (project / ".agents" / "project" / "AGENTS.md").write_text(
+        "# Project\nchanged rule\n", encoding="utf-8"
+    )
+
+    from b1.server.mcp_server import b1_pair
+    result = b1_pair()
+
+    assert "changed rule" in (project / "CLAUDE.md").read_text(encoding="utf-8")
+    assert check_drift(project) == []
+    assert "reconcile" not in result.lower()
+
+
+def test_b1_pair_returns_reconcile_message_on_drift(make_project, monkeypatch):
+    """Regression: b1_pair used to bypass check_drift and would silently
+    overwrite a hand-edit. It must now report the drift and point the user
+    at `b1 reconcile` via the returned string (MCP tools communicate via
+    strings, not HTTP status codes)."""
+    project = make_project(agents=["CLAUDE"])
+    monkeypatch.chdir(project)
+
+    from b1.server.mcp_server import b1_pair
+    b1_pair()  # first run records snapshots
+
+    (project / "CLAUDE.md").write_text("hand edited\n", encoding="utf-8")
+
+    result = b1_pair()
+    assert "CLAUDE.md" in result
+    assert "reconcile" in result.lower()
+
+
 @pytest.mark.asyncio
 async def test_get_compiled_context_returns_str(make_project, monkeypatch):
     """The MCP resource must return a plain string, not a CompiledContext
