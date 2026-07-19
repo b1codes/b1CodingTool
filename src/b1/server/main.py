@@ -161,7 +161,7 @@ def pair_context(req: Optional[PairRequest] = None):
                 f"Hand-edited generated files detected: {names}. "
                 "Run `b1 reconcile` to resolve, then retry."
             ),
-        )
+        ) from e
 
     return {"status": "success", "agents": config.active_agents}
 

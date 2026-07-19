@@ -139,6 +139,24 @@ def test_pair_context_records_snapshots_no_false_drift(client, cd_project):
     assert check_drift(cd_project) == []
 
 
+def test_pair_context_returns_success_on_empty_compile(tmp_path, monkeypatch):
+    """Regression/contract test: when run_pair returns False (empty compile --
+    no project seed, local seed, github metadata, or modules to compile), the
+    server must fall through to its existing success response rather than
+    erroring. This is the intentionally-preserved pre-Phase-3 contract; it had
+    no test coverage before."""
+    (tmp_path / ".agents").mkdir()
+    monkeypatch.chdir(tmp_path)
+
+    with TestClient(app) as client:
+        resp = client.post("/api/context/pair", json={"agents": ["CLAUDE"]})
+
+    assert resp.status_code == 200
+    assert resp.json() == {"status": "success", "agents": ["CLAUDE"]}
+    # Confirm the compile really was empty: no agent file was generated.
+    assert not (tmp_path / "CLAUDE.md").exists()
+
+
 def test_pair_context_halts_409_on_handedit(client, cd_project):
     """Regression: the server pair path used to bypass check_drift and would
     silently overwrite a hand-edit. It must now halt with 409 and point the
