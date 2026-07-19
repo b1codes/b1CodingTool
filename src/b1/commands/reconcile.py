@@ -44,11 +44,11 @@ def reconcile_cmd(
 
     for f in drifted:
         rel = f.relative_to(project_dir)
-        old = snapshot_for(project_dir, f) or ""
-        added = _added_lines(old, f.read_text(encoding="utf-8"))
         if discard_all:
             console.print(f"[yellow]Discarding hand-edits in {rel}.[/yellow]")
             continue
+        old = snapshot_for(project_dir, f) or ""
+        added = _added_lines(old, f.read_text(encoding="utf-8"))
         console.print(f"\n[bold]{rel}[/bold] — your added lines:")
         for line in added:
             console.print(f"  [green]+ {line}[/green]")
@@ -63,5 +63,11 @@ def reconcile_cmd(
         else:
             console.print("[yellow]Discarding.[/yellow]")
 
-    run_pair(project_dir, FULL_MATRIX, force=True)   # regenerate past the drift, refresh snapshots
-    console.print("\n[bold green]Reconcile complete — agent files regenerated.[/bold green]")
+    regenerated = run_pair(project_dir, FULL_MATRIX, force=True)   # regenerate past the drift, refresh snapshots
+    if regenerated:
+        console.print("\n[bold green]Reconcile complete — agent files regenerated.[/bold green]")
+    else:
+        console.print(
+            "\n[bold yellow]Reconcile: no context to regenerate — agent files were not "
+            "rewritten and any remaining drift was left in place.[/bold yellow]"
+        )
