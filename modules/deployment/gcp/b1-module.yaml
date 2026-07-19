@@ -1,0 +1,24 @@
+name: gcp
+version: 1.0.0
+type: deployment
+description: "Guidelines and configuration for preparing and deploying projects to Google Cloud (GKE, Cloud Run, Firebase, etc.)."
+skills:
+  - name: "GCP Infrastructure Auditor"
+    description: "Assists in auditing Terraform or Deployment Manager templates for security best practices."
+  - name: "Cloud Run Config Generator"
+    description: "Helps generate Cloud Run service.yaml manifests for stateless container deployments."
+  - name: "GKE Manifest Generator"
+    description: "Helps generate Kubernetes Deployment and Service manifests for GKE workloads."
+  - name: "Firebase Config Generator"
+    description: "Helps generate firebase.json and .firebaserc for Firebase Hosting/Functions projects."
+commands:
+  - name: "/gcp audit"
+    description: "Trigger a security audit of the infrastructure/gcp directory"
+  - name: "/gcp cloud-run-init"
+    description: "Generate a boilerplate Cloud Run service.yaml manifest"
+  - name: "/gcp gke-init"
+    description: "Generate boilerplate GKE Deployment and Service manifests"
+  - name: "/gcp firebase-init"
+    description: "Generate a boilerplate firebase.json and .firebaserc"
+hooks:
+  post-install: "scripts/post-install.sh"

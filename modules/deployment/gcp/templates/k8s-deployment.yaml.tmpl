@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{APP_NAME}}
+  labels:
+    app: {{APP_NAME}}
+    environment: {{ENVIRONMENT}}
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: {{APP_NAME}}
+  template:
+    metadata:
+      labels:
+        app: {{APP_NAME}}
+    spec:
+      containers:
+        - name: {{APP_NAME}}
+          image: {{IMAGE}}
+          ports:
+            - containerPort: {{CONTAINER_PORT}}
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{CONTAINER_PORT}}
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{CONTAINER_PORT}}
+            initialDelaySeconds: 15
