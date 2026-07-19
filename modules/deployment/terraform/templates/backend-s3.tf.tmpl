@@ -1,0 +1,9 @@
+terraform {
+  backend "s3" {
+    bucket         = "{{BUCKET_NAME}}"
+    key            = "{{STATE_KEY}}"
+    region         = "{{REGION}}"
+    dynamodb_table = "{{LOCK_TABLE}}"
+    encrypt        = true
+  }
+}

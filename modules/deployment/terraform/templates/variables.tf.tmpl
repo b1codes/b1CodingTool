@@ -1,0 +1,15 @@
+variable "project" {
+  description = "Identifier for the project, used for resource naming and tagging."
+  type        = string
+  default     = "{{PROJECT_NAME}}"
+}
+
+variable "environment" {
+  description = "Deployment environment (dev, staging, prod)."
+  type        = string
+}
+
+variable "owner" {
+  description = "Team or person responsible for this infrastructure."
+  type        = string
+}

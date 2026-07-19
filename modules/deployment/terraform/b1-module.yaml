@@ -1,0 +1,20 @@
+name: terraform
+version: 1.0.0
+type: deployment
+description: "Cloud-agnostic guidelines and scaffolding for structuring and deploying Terraform-managed infrastructure."
+skills:
+  - name: "Terraform State Backend Configurator"
+    description: "Helps generate a remote state backend.tf for S3, GCS, or Azure Storage with locking enabled."
+  - name: "Terraform Project Scaffolder"
+    description: "Generates root module boilerplate (main.tf, variables.tf, outputs.tf, versions.tf) and per-environment tfvars."
+  - name: "Terraform Infrastructure Auditor"
+    description: "Assists in auditing .tf files for security and best-practice issues (hardcoded secrets, unpinned versions, missing state locking)."
+commands:
+  - name: "/terraform backend-init"
+    description: "Generate a remote state backend.tf (S3, GCS, or Azure Storage)"
+  - name: "/terraform project-init"
+    description: "Generate boilerplate root Terraform files and per-environment tfvars"
+  - name: "/terraform audit"
+    description: "Trigger a best-practices audit of the infrastructure/terraform directory"
+hooks:
+  post-install: "scripts/post-install.sh"
