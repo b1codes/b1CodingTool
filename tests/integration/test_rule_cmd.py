@@ -41,3 +41,13 @@ def test_rule_no_pair_appends_without_generating(make_project):
     assert result.exit_code == 0
     assert "- Skip the fan-out" in (project / ".agents" / "project" / "AGENTS.md").read_text(encoding="utf-8")
     assert not (project / "AGENTS.md").exists()
+
+
+def test_rule_halts_on_drift(make_project):
+    project = make_project(agents=["CLAUDE"])
+    (project / ".agents" / "project" / "AGENTS.md").write_text("# P\nrule", encoding="utf-8")
+    _run(project, ["rule", "seed the snapshots"])          # establishes snapshots via run_pair
+    (project / "AGENTS.md").write_text("hand edited root\n", encoding="utf-8")
+    result = _run(project, ["rule", "another rule"])
+    assert result.exit_code == 1
+    assert "reconcile" in result.output.lower()

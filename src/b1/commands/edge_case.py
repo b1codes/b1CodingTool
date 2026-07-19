@@ -5,7 +5,7 @@ from pathlib import Path
 from rich.console import Console
 
 from b1.core.notes import append_note
-from b1.commands.pair import run_pair, FULL_MATRIX
+from b1.commands.pair import _run_pair_or_halt, FULL_MATRIX
 
 console = Console()
 
@@ -37,5 +37,5 @@ def edge_case_cmd(
         return
     console.print(f"[green]✔ Recorded edge case in[/green] {rel}")
     if not no_pair:
-        run_pair(project_dir, FULL_MATRIX)
+        _run_pair_or_halt(project_dir, FULL_MATRIX)
         console.print("[green]Now loaded for every agent (Claude, Codex, Antigravity).[/green]")

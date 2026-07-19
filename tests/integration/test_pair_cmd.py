@@ -98,3 +98,29 @@ def test_run_pair_returns_false_when_empty(tmp_path):
     from b1.commands.pair import run_pair
     (tmp_path / ".agents").mkdir()
     assert run_pair(tmp_path, ["CLAUDE"]) is False
+
+
+def test_run_pair_raises_drifterror_on_handedit(make_project):
+    from b1.commands.pair import run_pair
+    from b1.core.exceptions import DriftError
+    project = make_project(agents=["CLAUDE"])
+    (project / ".agents" / "project" / "AGENTS.md").write_text("# P\nrule", encoding="utf-8")
+    run_pair(project, ["CLAUDE"])                      # first run records snapshots
+    (project / "CLAUDE.md").write_text("hand edited\n", encoding="utf-8")
+    try:
+        run_pair(project, ["CLAUDE"])
+        assert False, "expected DriftError"
+    except DriftError as e:
+        assert any(p.name == "CLAUDE.md" for p in e.files)
+
+
+def test_run_pair_force_bypasses_drift(make_project):
+    from b1.commands.pair import run_pair
+    project = make_project(agents=["CLAUDE"])
+    (project / ".agents" / "project" / "AGENTS.md").write_text("# P\nrule", encoding="utf-8")
+    run_pair(project, ["CLAUDE"])
+    (project / "CLAUDE.md").write_text("hand edited\n", encoding="utf-8")
+    assert run_pair(project, ["CLAUDE"], force=True) is True   # no raise
+    # regenerated -> snapshot refreshed -> no drift now
+    from b1.core.snapshots import check_drift
+    assert check_drift(project) == []

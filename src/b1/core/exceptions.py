@@ -18,3 +18,13 @@ class ValidationError(B1Error):
 class ProjectError(B1Error):
     """Raised when there's an issue with the project structure (e.g. missing .agents)."""
     pass
+
+class DriftError(B1Error):
+    """Raised when a generated file was hand-edited since b1 last wrote it."""
+    def __init__(self, files):
+        self.files = files
+        names = ", ".join(str(f) for f in files)
+        super().__init__(
+            f"Hand-edited generated files detected: {names}",
+            suggestions=["Run `b1 reconcile` to promote or discard the changes."],
+        )
