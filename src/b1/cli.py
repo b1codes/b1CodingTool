@@ -9,6 +9,7 @@ from b1.commands.push import push_cmd
 from b1.commands.pair import pair_cmd
 from b1.commands.rule import rule_cmd
 from b1.commands.edge_case import edge_case_cmd
+from b1.commands.reconcile import reconcile_cmd
 from b1.commands.dashboard import dashboard_cmd
 from b1.commands.link_clickup import link_clickup_cmd
 from b1.commands.link_github import link_github_cmd
@@ -29,6 +30,7 @@ app.command(name="push")(push_cmd)
 app.command(name="pair")(pair_cmd)
 app.command(name="rule")(rule_cmd)
 app.command(name="edge-case")(edge_case_cmd)
+app.command(name="reconcile")(reconcile_cmd)
 app.command(name="dashboard")(dashboard_cmd)
 app.command(name="link-to-clickup-list")(link_clickup_cmd)
 app.command(name="link-to-github-repo")(link_github_cmd)
