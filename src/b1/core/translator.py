@@ -122,7 +122,8 @@ class AgentTranslator:
         gitignore = self.project_dir / ".gitignore"
         entries = ["CLAUDE.md", "CLAUDE.local.md", "AGENTS.override.md",
                    ".claude/", ".agents/local/", ".agents/rules/local.md",
-                   ".agents/skills/b1-rule.md", ".agents/skills/b1-edge-case.md"]
+                   ".agents/skills/b1-rule.md", ".agents/skills/b1-edge-case.md",
+                   ".agents/skills/b1-reconcile.md", ".agents/.b1-snapshots/"]
         existing = gitignore.read_text(encoding="utf-8").splitlines() if gitignore.exists() else []
         missing = [e for e in entries if e not in existing]
         if missing:

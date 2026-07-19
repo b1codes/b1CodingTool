@@ -19,3 +19,12 @@ def test_shims_are_idempotent(tmp_path):
     write_agent_shims(tmp_path)
     write_agent_shims(tmp_path)  # must not raise or duplicate
     assert (tmp_path / ".claude" / "commands" / "b1-rule.md").exists()
+
+
+def test_writes_reconcile_shim(tmp_path):
+    from b1.core.shims import write_agent_shims
+    write_agent_shims(tmp_path)
+    for p in [".claude/commands/b1-reconcile.md", ".agents/skills/b1-reconcile.md"]:
+        f = tmp_path / p
+        assert f.exists(), p
+        assert "b1 reconcile" in f.read_text(encoding="utf-8")

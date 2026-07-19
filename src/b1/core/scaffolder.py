@@ -18,6 +18,8 @@ AGENTS.override.md
 .agents/rules/local.md
 .agents/skills/b1-rule.md
 .agents/skills/b1-edge-case.md
+.agents/skills/b1-reconcile.md
+.agents/.b1-snapshots/
 """
 
 README_CONTENT = """# b1CodingTool Project

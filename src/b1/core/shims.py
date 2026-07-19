@@ -23,9 +23,20 @@ Use `--scope local` instead if the edge case is personal to you rather than the 
 whole team. After it runs, confirm where it was saved.
 """
 
+_RECONCILE_BODY = """Some generated agent files were edited by hand and are now out of \
+sync with the b1 sources. Run:
+
+    b1 reconcile
+
+For each changed file it shows the added lines and asks whether to promote them to the \
+project seed (team) or local seed (personal), or discard them. Help me decide based on \
+whether each change is a shared team rule or a personal note, then confirm the result.
+"""
+
 _SHIMS = {
     "b1-rule.md": _RULE_BODY,
     "b1-edge-case.md": _EDGE_BODY,
+    "b1-reconcile.md": _RECONCILE_BODY,
 }
 
 
