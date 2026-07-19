@@ -32,6 +32,7 @@ def test_reconcile_promotes_root_edit_to_project_seed(make_project):
     # after regenerate, no drift remains
     from b1.core.snapshots import check_drift
     assert check_drift(project) == []
+    assert "- hand added guardrail" in (project / "AGENTS.md").read_text(encoding="utf-8")
 
 
 def test_reconcile_discard_all_reverts(make_project):
