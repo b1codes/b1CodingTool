@@ -3,8 +3,7 @@ from typing import Annotated
 from pathlib import Path
 from rich.console import Console
 
-from b1.core.notes import append_note
-from b1.commands.pair import _run_pair_or_halt, FULL_MATRIX
+from b1.commands._notes import record_note
 
 console = Console()
 
@@ -19,16 +18,5 @@ def rule_cmd(
     if not (project_dir / ".agents").exists():
         console.print("[bold red]Project not initialized. Run b1 init.[/bold red]")
         raise typer.Exit(1)
-    if scope not in ("project", "local"):
-        console.print("[bold red]--scope must be 'project' or 'local'.[/bold red]")
-        raise typer.Exit(1)
 
-    dest, appended = append_note(project_dir, "rule", text, scope)
-    rel = dest.relative_to(project_dir)
-    if not appended:
-        console.print(f"[yellow]Already recorded in {rel}; nothing to do.[/yellow]")
-        return
-    console.print(f"[green]✔ Recorded guardrail in[/green] {rel}")
-    if not no_pair:
-        _run_pair_or_halt(project_dir, FULL_MATRIX)
-        console.print("[green]Now loaded for every agent (Claude, Codex, Antigravity).[/green]")
+    record_note(project_dir, "rule", text, scope, no_pair, "guardrail")
