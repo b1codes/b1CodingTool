@@ -1,4 +1,4 @@
-from b1.core.snapshots import record_snapshots, check_drift, snapshot_for
+from b1.core.snapshots import record_snapshots, check_drift, snapshot_for, tracked_files
 
 
 def _write(p, text):
@@ -40,3 +40,43 @@ def test_record_prunes_snapshot_when_file_removed(tmp_path):
     f.unlink()
     record_snapshots(tmp_path)
     assert snapshot_for(tmp_path, f) is None
+
+
+def test_nested_tracked_path_round_trip(tmp_path):
+    """Test that nested paths like .agents/rules/local.md are correctly
+    recorded, retrieved, and drift-detected with / → __ flattening."""
+    nested_file = tmp_path / ".agents/rules/local.md"
+    content = "nested rules config\n"
+    _write(nested_file, content)
+
+    # Record snapshots
+    record_snapshots(tmp_path)
+
+    # snapshot_for should return the exact recorded content
+    assert snapshot_for(tmp_path, nested_file) == content
+
+    # Modify the file and verify drift detection
+    modified_content = "nested rules config\n- modified\n"
+    nested_file.write_text(modified_content, encoding="utf-8")
+    drifted = check_drift(tmp_path)
+    assert [p.name for p in drifted] == ["local.md"]
+
+
+def test_tracked_files_direct_coverage(tmp_path):
+    """Test that tracked_files() returns only existing tracked files,
+    excluding non-tracked files."""
+    # Create some tracked files
+    _write(tmp_path / "AGENTS.md", "agents\n")
+    _write(tmp_path / ".agents/rules/local.md", "rules\n")
+
+    # Create a non-tracked file
+    _write(tmp_path / "README.md", "readme\n")
+
+    # tracked_files should return only the tracked ones
+    result = tracked_files(tmp_path)
+    result_names = sorted([p.name for p in result])
+    assert result_names == ["AGENTS.md", "local.md"]
+
+    # Verify the paths are correct (relative to project_dir)
+    result_paths = sorted([p.relative_to(tmp_path).as_posix() for p in result])
+    assert result_paths == [".agents/rules/local.md", "AGENTS.md"]
