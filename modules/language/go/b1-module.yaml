@@ -1,0 +1,11 @@
+name: go
+version: 1.0.0
+type: development
+description: "Core Go language standards, idiomatic project layout, and module/dependency management with the go tool."
+skills:
+  - name: "Go Test Generator"
+    description: "Automated table-driven test generation for Go packages."
+  - name: "Error Wrapping Assistant"
+    description: "Assists in refactoring error handling to use fmt.Errorf with %w and sentinel/typed errors."
+hooks:
+  post-install: "scripts/post-install.sh"
