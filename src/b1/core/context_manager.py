@@ -8,7 +8,6 @@ This is the project-specific `AGENTS.md` context file.
 It contains app logic, directory structures, and active tasks.
 
 ## Architecture Notes
-- Follow the guidelines specified in the root `AGENTS.md`.
 
 ## Guardrails
 
@@ -84,3 +83,13 @@ def setup_context(root_dir: Path):
         console.print("[green]Created personal local seed in .agents/local/AGENTS.md.[/green]")
     else:
         console.print("[dim]Personal local seed already exists, skipping.[/dim]")
+
+    # Generate root AGENTS.md if it doesn't exist yet
+    if not case_sensitive_exists(root_agent_path):
+        from b1.core.compiler import ContextCompiler
+        from b1.core.translator import AgentTranslator
+        
+        compiler = ContextCompiler(root_dir)
+        compiled = compiler.compile()
+        translator = AgentTranslator(root_dir)
+        translator.render_root_agents(compiled)
