@@ -67,7 +67,7 @@ def push_cmd():
         # 2. Selective Staging
         staged_any = False
         
-        # Always check root AGENTS.md / agents.md as it's project-agnostic
+        # Always check root AGENTS.md / agents.md fallback as it's project-agnostic
         root_agent = project_dir / "AGENTS.md"
         root_agent_name = "AGENTS.md"
         if not root_agent.exists():

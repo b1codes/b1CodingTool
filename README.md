@@ -4,11 +4,11 @@
 
 ## How it works
 
-1. **`b1 init`** — scaffolds an `.agents/` directory in your project with a layered `agents.md` hierarchy.
+1. **`b1 init`** — scaffolds an `.agents/` directory in your project with a layered `AGENTS.md` hierarchy.
 2. **`b1 install <module>`** — installs a module (local path or git URL), injecting its context docs and skills into `.agents/`.
-3. **`b1 pair`** — compiles the full `agents.md` hierarchy and writes identical content to `CLAUDE.md`, `GEMINI.md`, and `AGENTS.md`.
+3. **`b1 pair`** — compiles the full `AGENTS.md` hierarchy and writes identical content to `CLAUDE.md`, `GEMINI.md`, and `AGENTS.md`.
 
-> **Note:** `CLAUDE.md`, `GEMINI.md`, and `AGENTS.md` are auto-generated. Edit `agents.md` or `.agents/project/agents.md` instead, then re-run `b1 pair`.
+> **Note:** `CLAUDE.md`, `GEMINI.md`, and `AGENTS.md` are auto-generated. Edit `AGENTS.md` or `.agents/project/AGENTS.md` instead, then re-run `b1 pair`.
 
 ## Installation
 
@@ -73,15 +73,15 @@ uv run b1 install https://github.com/org/b1-modules#flutter
 
 ```
 .agents/
-├── agents.md              # Root context: project-agnostic practices
+├── AGENTS.md              # Root context: project-agnostic practices
 ├── project/
-│   └── agents.md          # Project-specific context: app logic, tasks, decisions
+│   └── AGENTS.md          # Project-specific context: app logic, tasks, decisions
 └── modules/
     └── flutter/          # Installed module files
         └── context/
 ```
 
-The `ContextCompiler` assembles these in order — root `agents.md` → project `agents.md` → installed module context files — and `b1 pair` writes the result to all agent-specific files.
+The `ContextCompiler` assembles these in order — root `AGENTS.md` → project `AGENTS.md` → installed module context files — and `b1 pair` writes the result to all agent-specific files.
 
 ## Architecture
 
@@ -90,9 +90,9 @@ src/b1/
   cli.py               # Typer entry point — registers all commands
   commands/            # One file per CLI command
   core/
-    compiler.py        # Compiles agents.md hierarchy into a single string
+    compiler.py        # Compiles AGENTS.md hierarchy into a single string
     translator.py      # Writes compiled string to CLAUDE.md, GEMINI.md, AGENTS.md
-    context_manager.py # Scaffolds agents.md files on b1 init
+    context_manager.py # Scaffolds AGENTS.md files on b1 init
     installer.py       # Copies module files into .agents/modules/
     fetcher.py         # Resolves module source: local path or git clone
     scaffolder.py      # Scaffolds .agents/ directory structure

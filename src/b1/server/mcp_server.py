@@ -59,7 +59,7 @@ def b1_install(source: str, link: bool = False) -> str:
 @mcp.tool()
 def b1_pair() -> str:
     """
-    Synchronizes the centralized agents.md context across agent-specific files (CLAUDE.md, CODEX, ANTIGRAVITY).
+    Synchronizes the centralized AGENTS.md context across agent-specific files (CLAUDE.md, CODEX, ANTIGRAVITY).
     """
     project_dir = Path.cwd()
     if not (project_dir / ".agents").exists():
@@ -174,7 +174,7 @@ def b1_status() -> str:
 @mcp.resource("b1://context/compiled")
 def get_compiled_context() -> str:
     """
-    Returns the fully merged content of the project-level agents.md and all active module context files.
+    Returns the fully merged content of the project-level AGENTS.md and all active module context files.
     """
     project_dir = Path.cwd()
     config = B1Config.load(project_dir)
