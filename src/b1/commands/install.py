@@ -14,7 +14,7 @@ DEFAULT_BUNDLES = {
     "flutter": ["dart", "flutter"],
     "llc-base": [
         "llc-api-health",
-        "llc-auth0",
+        "llc-gcp-identity-platform",
         "llc-devops-infra",
         "llc-ip-protection",
         "llc-logging",
@@ -27,7 +27,7 @@ DEFAULT_BUNDLES = {
         "flutter",
         "llc-flutter",
         "llc-api-health",
-        "llc-auth0",
+        "llc-gcp-identity-platform",
         "llc-logging",
         "llc-standards",
         "llc-security"
@@ -37,7 +37,7 @@ DEFAULT_BUNDLES = {
         "react-web",
         "llc-react",
         "llc-api-health",
-        "llc-auth0",
+        "llc-gcp-identity-platform",
         "llc-logging",
         "llc-standards",
         "llc-security"
@@ -47,14 +47,14 @@ DEFAULT_BUNDLES = {
         "swiftui",
         "llc-swift",
         "llc-api-health",
-        "llc-auth0",
+        "llc-gcp-identity-platform",
         "llc-logging",
         "llc-standards",
         "llc-security"
     ],
     "llc": [
         "llc-api-health",
-        "llc-auth0",
+        "llc-gcp-identity-platform",
         "llc-devops-infra",
         "llc-flutter",
         "llc-ip-protection",

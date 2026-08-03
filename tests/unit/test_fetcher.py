@@ -97,6 +97,26 @@ def test_fetch_by_name_with_library_path(tmp_path):
         assert result == mod_dir
 
 
+def test_fetch_by_name_discovers_sibling_llc_lib_repo(tmp_path, monkeypatch):
+    # Simulate the umbrella workspace layout: a tool checkout and a sibling
+    # "<name>-LLC-lib" repo, with no B1_LIBRARY_PATH configured.
+    workspace = tmp_path / "workspace"
+    tool_root = workspace / "b1CodingTool"
+    fake_fetcher_file = tool_root / "src" / "b1" / "core" / "fetcher.py"
+
+    overlay_root = workspace / "b1CodingTool-LLC-lib"
+    mod_dir = overlay_root / "modules" / "llc-api-health"
+    mod_dir.mkdir(parents=True)
+    (mod_dir / "b1-module.yaml").write_text("name: llc-api-health", encoding="utf-8")
+
+    monkeypatch.delenv("B1_LIBRARY_PATH", raising=False)
+    monkeypatch.setattr("b1.core.fetcher.__file__", str(fake_fetcher_file))
+
+    fetcher = _fetcher(tmp_path)
+    result = fetcher.fetch("llc-api-health")
+    assert result == mod_dir
+
+
 def test_fetch_by_name_fallback_to_git(tmp_path):
     # lib_root exists but doesn't have the module
     lib_root = tmp_path / "lib"

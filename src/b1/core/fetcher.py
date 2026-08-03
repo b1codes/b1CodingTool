@@ -36,6 +36,21 @@ class ModuleFetcher:
         if tool_root not in potential_library_roots:
             potential_library_roots.append(tool_root)
 
+        # Also check for a sibling private overlay repo (e.g. "<name>-LLC-lib"
+        # next to the tool checkout), matching the umbrella workspace convention
+        # documented in this project's CLAUDE.md, so proprietary llc-* bundle
+        # modules resolve without requiring B1_LIBRARY_PATH to be set manually.
+        workspace_root = tool_root.parent
+        if workspace_root.exists():
+            for sibling in sorted(workspace_root.iterdir()):
+                if (
+                    sibling.is_dir()
+                    and sibling != tool_root
+                    and "llc-lib" in sibling.name.lower()
+                    and sibling not in potential_library_roots
+                ):
+                    potential_library_roots.append(sibling)
+
         for lib_root in potential_library_roots:
             if lib_root.exists():
                 modules_base = lib_root / "modules"
