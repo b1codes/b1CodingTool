@@ -2,6 +2,7 @@
 from typer.testing import CliRunner
 from b1.cli import app
 from b1.core.exceptions import ProjectError
+from unittest.mock import patch
 
 runner = CliRunner()
 
@@ -51,3 +52,33 @@ def test_upgrade_is_idempotent(make_project, monkeypatch):
     local_seed.write_text("custom local notes", encoding="utf-8")
     runner.invoke(app, ["upgrade"])
     assert local_seed.read_text(encoding="utf-8") == "custom local notes"
+
+
+def test_upgrade_offers_repair_and_runs_it_on_yes(make_project, monkeypatch):
+    project = make_project()
+    monkeypatch.chdir(project)
+    with patch("b1.commands.upgrade.pair_cmd") as mock_pair:
+        result = runner.invoke(app, ["upgrade"], input="y\n")
+    assert result.exit_code == 0
+    mock_pair.assert_called_once_with(sync=False)
+
+
+def test_upgrade_declines_repair_on_no(make_project, monkeypatch):
+    project = make_project()
+    monkeypatch.chdir(project)
+    with patch("b1.commands.upgrade.pair_cmd") as mock_pair:
+        result = runner.invoke(app, ["upgrade"], input="n\n")
+    assert result.exit_code == 0
+    mock_pair.assert_not_called()
+
+
+def test_upgrade_treats_no_input_as_decline(make_project, monkeypatch):
+    """Simulates non-interactive/EOF stdin (no input= given): the re-pair
+    confirm prompt should be treated as "no" instead of raising click.Abort
+    and exiting non-zero."""
+    project = make_project()
+    monkeypatch.chdir(project)
+    with patch("b1.commands.upgrade.pair_cmd") as mock_pair:
+        result = runner.invoke(app, ["upgrade"])
+    assert result.exit_code == 0
+    mock_pair.assert_not_called()

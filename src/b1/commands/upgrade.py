@@ -1,3 +1,4 @@
+import click
 import typer
 from typing import Optional, Annotated
 from pathlib import Path
@@ -5,6 +6,7 @@ from rich.console import Console
 
 from b1.core.exceptions import ProjectError
 from b1.core.context_manager import setup_context
+from b1.commands.pair import pair_cmd
 
 console = Console()
 
@@ -31,3 +33,10 @@ def upgrade_cmd(
     setup_context(project_dir)
 
     console.print("[bold green]Upgrade complete![/bold green]")
+
+    try:
+        do_repair = typer.confirm("Re-pair now to apply updates?", default=False)
+    except click.Abort:
+        do_repair = False
+    if do_repair:
+        pair_cmd(sync=False)
