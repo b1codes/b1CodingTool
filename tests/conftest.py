@@ -1,8 +1,15 @@
 # tests/conftest.py
+import sys
+from pathlib import Path
+
+# Ensure we use the worktree's source code
+worktree_src = Path(__file__).parent.parent / "src"
+if str(worktree_src) not in sys.path:
+    sys.path.insert(0, str(worktree_src))
+
 import shutil
 import pytest
 import yaml
-from pathlib import Path
 
 
 @pytest.fixture
