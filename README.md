@@ -27,6 +27,7 @@ uv sync
 | `uv run b1 init [path]` | Bootstrap a project with `.agents/` structure |
 | `uv run b1 install <source>` | Install a module (local path or git URL) |
 | `uv run b1 pull` | Sync modules from upstream repo |
+| `uv run b1 upgrade [path]` | Backfill `.agents/` scaffolding on an existing project (e.g. missing `.agents/local/`) |
 | `uv run b1 push` | Draft a PR to contribute generalized rules upstream |
 | `uv run b1 pair` | Regenerate `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` |
 | `uv run b1 dashboard` | Launch the React dashboard on localhost |

@@ -12,6 +12,7 @@ def test_upgrade_errors_when_agents_dir_missing(tmp_path, monkeypatch):
     result = runner.invoke(app, ["upgrade"])
     assert result.exit_code != 0
     assert isinstance(result.exception, ProjectError)
+    assert not any(tmp_path.iterdir())
 
 
 def test_upgrade_backfills_missing_local_seed_without_touching_project_seed(make_project, monkeypatch):
@@ -30,7 +31,8 @@ def test_upgrade_backfills_missing_local_seed_without_touching_project_seed(make
 def test_upgrade_does_not_create_init_only_scaffolding(make_project, monkeypatch):
     project = make_project()
     monkeypatch.chdir(project)
-    runner.invoke(app, ["upgrade"])
+    result = runner.invoke(app, ["upgrade"])
+    assert result.exit_code == 0
     assert not (project / "docs").exists()
     assert not (project / "README.md").exists()
     assert not (project / ".gitignore").exists()

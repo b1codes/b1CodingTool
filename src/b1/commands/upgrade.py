@@ -17,7 +17,7 @@ def upgrade_cmd(
     """
     Backfills an existing project's .agents/ scaffolding (e.g. a missing
     .agents/local/AGENTS.md) to match what the current b1CodingTool version
-    expects, without touching existing content.
+    expects, without overwriting or discarding existing content.
     """
     project_dir = (path or Path.cwd()).resolve()
 
