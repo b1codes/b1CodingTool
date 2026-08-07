@@ -5,6 +5,7 @@ from b1.core.exceptions import B1Error
 from b1.commands.init import init_cmd
 from b1.commands.install import install_cmd
 from b1.commands.pull import pull_cmd
+from b1.commands.upgrade import upgrade_cmd
 from b1.commands.push import push_cmd
 from b1.commands.pair import pair_cmd
 from b1.commands.rule import rule_cmd
@@ -26,6 +27,7 @@ console = Console()
 app.command(name="init")(init_cmd)
 app.command(name="install")(install_cmd)
 app.command(name="pull")(pull_cmd)
+app.command(name="upgrade")(upgrade_cmd)
 app.command(name="push")(push_cmd)
 app.command(name="pair")(pair_cmd)
 app.command(name="rule")(rule_cmd)
