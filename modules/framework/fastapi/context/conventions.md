@@ -9,7 +9,7 @@
 ## Import Order (Ruff / isort groups)
 1. Standard library
 2. FastAPI and Pydantic
-3. Third-party packages (SQLAlchemy, etc.)
+3. Third-party packages (SQLAlchemy, Motor, PyJWT, etc.)
 4. Local app imports
 
 ```python
@@ -20,11 +20,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.core.dependencies import get_current_user, get_db
-from app.features.users.models import User
+from app.core.dependencies import get_current_user_context, get_repository
+from app.features.users.schemas import UserResponse
 ```
 
 ## Naming
@@ -36,36 +33,37 @@ from app.features.users.models import User
 | Route handler functions | `<verb>_<resource>` | `create_user`, `get_user`, `delete_post` |
 | Pydantic schemas (input) | `<Model>Create` / `<Model>Update` | `UserCreate`, `PostUpdate` |
 | Pydantic schemas (output) | `<Model>Response` | `UserResponse`, `PostResponse` |
-| SQLAlchemy models | singular `PascalCase` | `User`, `Post`, `Comment` |
-| DB table names | `snake_case`, plural | `users`, `blog_posts` |
+| SQL / Document models | singular `PascalCase` | `User`, `Post`, `Comment` |
+| DB tables / collections | `snake_case`, plural | `users`, `blog_posts` |
 | Constants | `SCREAMING_SNAKE_CASE` | `ACCESS_TOKEN_EXPIRE_MINUTES` |
-| Dependencies | `get_<thing>` | `get_db`, `get_current_user` |
+| Dependencies | `get_<thing>` | `get_repository`, `get_db`, `get_current_user_context` |
 
 ## Route Handler Signatures
 - Declare path/query/body parameters using **type annotations** — FastAPI derives them automatically.
 - Use `Annotated[T, Depends(...)]` (the newer style) over `param: T = Depends(...)` for cleaner signatures.
-- Keep route handlers thin — they should validate input, call a service function, and return the result. No business logic in handlers.
+- Keep route handlers thin — they should validate input, call a service/repository function, and return the result. No business logic in handlers.
 
 ```python
 from typing import Annotated
 
-CurrentUser = Annotated[User, Depends(get_current_user)]
-DBSession = Annotated[AsyncSession, Depends(get_db)]
+CurrentUser = Annotated[UserContext, Depends(get_current_user_context)]
+UserRepo = Annotated[UserRepository, Depends(get_user_repository)]
 
 @router.get("/{user_id}", response_model=UserResponse)
-async def get_user(user_id: int, db: DBSession, _: CurrentUser) -> User:
-    user = await user_service.get_by_id(db, user_id)
+async def get_user(user_id: str, repo: UserRepo, _: CurrentUser) -> UserResponse:
+    user = await repo.get_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 ```
 
-## SQLAlchemy Models
-- Define all models with a `DeclarativeBase` subclass. Use `Mapped[T]` and `mapped_column()` (SQLAlchemy 2.x syntax) — not the legacy `Column()` API.
-- Always define `__tablename__`.
-- Use `created_at` / `updated_at` on every model with `server_default=func.now()` and `onupdate=func.now()`.
+## Data Models (SQL & Document Models)
+- For relational SQL databases, define models with SQLAlchemy 2.x `DeclarativeBase` subclass using `Mapped[T]` and `mapped_column()`.
+- For NoSQL document databases, define models using ODMs (e.g. `beanie.Document`) or Pydantic models.
+- Standardize timestamp fields (`created_at`, `updated_at`) across database models.
 
 ```python
+# SQLAlchemy 2.x SQL Model Example
 from sqlalchemy import String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from datetime import datetime
@@ -100,3 +98,4 @@ class Settings(BaseSettings):
 
 settings = Settings()
 ```
+
