@@ -33,10 +33,24 @@ project seed (team) or local seed (personal), or discard them. Help me decide ba
 whether each change is a shared team rule or a personal note, then confirm the result.
 """
 
+_UPDATE_PROJECT_BODY = """Keep this project's coding-agent tooling current: refresh Claude Code, \
+Antigravity, and Codex CLI plugin marketplaces and installed plugins (whichever of those CLIs are \
+on PATH), then check for skill updates.
+
+Run:
+
+    b1 update-project
+
+Pass `--claude`, `--agy`, or `--codex` to target a single CLI instead of auto-detecting, `--all` to \
+force all three, or `--skip-skills` to skip the `npx skills update` step. After it runs, summarize \
+what got updated (or skipped, and why).
+"""
+
 _SHIMS = {
     "b1-rule.md": _RULE_BODY,
     "b1-edge-case.md": _EDGE_BODY,
     "b1-reconcile.md": _RECONCILE_BODY,
+    "b1-update-project.md": _UPDATE_PROJECT_BODY,
 }
 
 

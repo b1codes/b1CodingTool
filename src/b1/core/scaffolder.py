@@ -19,6 +19,7 @@ AGENTS.override.md
 .agents/skills/b1-rule.md
 .agents/skills/b1-edge-case.md
 .agents/skills/b1-reconcile.md
+.agents/skills/b1-update-project.md
 .agents/.b1-snapshots/
 """
 

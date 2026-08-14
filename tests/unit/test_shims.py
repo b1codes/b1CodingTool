@@ -28,3 +28,12 @@ def test_writes_reconcile_shim(tmp_path):
         f = tmp_path / p
         assert f.exists(), p
         assert "b1 reconcile" in f.read_text(encoding="utf-8")
+
+
+def test_writes_update_project_shim(tmp_path):
+    from b1.core.shims import write_agent_shims
+    write_agent_shims(tmp_path)
+    for p in [".claude/commands/b1-update-project.md", ".agents/skills/b1-update-project.md"]:
+        f = tmp_path / p
+        assert f.exists(), p
+        assert "b1 update-project" in f.read_text(encoding="utf-8")

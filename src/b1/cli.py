@@ -14,6 +14,7 @@ from b1.commands.reconcile import reconcile_cmd
 from b1.commands.dashboard import dashboard_cmd
 from b1.commands.link_clickup import link_clickup_cmd
 from b1.commands.link_github import link_github_cmd
+from b1.commands.update_project import update_project_cmd
 from b1.commands.skill import app as skill_app
 
 app = typer.Typer(
@@ -36,6 +37,7 @@ app.command(name="reconcile")(reconcile_cmd)
 app.command(name="dashboard")(dashboard_cmd)
 app.command(name="link-to-clickup-list")(link_clickup_cmd)
 app.command(name="link-to-github-repo")(link_github_cmd)
+app.command(name="update-project")(update_project_cmd)
 app.add_typer(skill_app, name="skill")
 
 def main():
