@@ -6,6 +6,6 @@ skills:
   - name: "SwiftUI View Generator"
     description: "Assists in creating new SwiftUI Views with consistent structure and Previews."
   - name: "SwiftUI State Architect"
-    description: "Guidance on selecting the appropriate state management tool (@State, @Binding, @Observable)."
+    description: "Guidance on selecting the appropriate state management tool: The Composable Architecture (TCA) for feature/business state, @State/@Binding for local view-only state."
 hooks:
   post-install: "scripts/post-install.sh"

@@ -5,11 +5,11 @@
 - **View Hierarchy:** Prefer `Group` or `@ViewBuilder` for logic-heavy views to avoid deep nesting of `if/else` inside containers.
 - **Computed Properties:** Use private computed properties for simple sub-elements that don't need their own state.
 
-## State Management (Modern)
-- **Local State:** Use `@State` for private, simple data owned by the view.
-- **Shared State:** Use the `@Observable` macro (Swift 5.9+) for complex models. Avoid `ObservableObject` and `@Published` in new code.
-- **Data Flow:** Pass data down via initializers; use `@Environment` for cross-cutting concerns (e.g., theme, user session).
-- **Binding:** Use `@Binding` to create a two-way connection to state owned by a parent view.
+## State Management
+- **Feature/Business State:** Use The Composable Architecture (TCA) — `@Reducer` + `@ObservableState` + `Store`. See `swiftui-tca.md` for the full pattern. Avoid `ObservableObject`/`@Published` and standalone `@Observable` view models in new code; TCA's `@ObservableState` is the standardized replacement.
+- **Local View State:** Use `@State` only for private, ephemeral, view-only data with no side effects (e.g. a `TextField`'s focus state, an in-progress drag offset).
+- **Data Flow:** Pass a `Store` down via initializers; use `@Environment` only for cross-cutting concerns that are not feature state (e.g. theme, color scheme).
+- **Binding:** Use `@Binding` for two-way connections to state owned by a parent *view*. When the binding needs to reach into a TCA `Store`, derive it with `@Bindable var store` and `.sending(\.action)` instead.
 
 ## Performance
 - **Identify Stability:** Ensure your data models are stable to prevent unnecessary view body evaluations.
