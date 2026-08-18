@@ -34,15 +34,20 @@ Routes are discovered by filesystem layout under `app/`. The structure of `app/`
 │   │   ├── theme/             # Design tokens, colors, spacing, typography
 │   │   │   └── index.ts
 │   │   ├── utils/             # Pure utility functions
-│   │   └── constants/         # App-wide constants (API_BASE_URL, etc.)
+│   │   ├── constants/         # App-wide constants (API_BASE_URL, etc.)
+│   │   └── store/             # Redux Toolkit store setup (see redux.md)
+│   │       ├── index.ts       # configureStore, RootState/AppDispatch types
+│   │       ├── hooks.ts       # useAppDispatch/useAppSelector
+│   │       ├── api.ts         # createApi — shared RTK Query base
+│   │       └── persist.ts     # redux-persist config (non-sensitive slices only)
 │   └── features/
 │       ├── auth/
 │       │   ├── components/    # Feature-local UI components
 │       │   ├── hooks/         # Feature-local hooks
 │       │   ├── services/      # API calls for this feature
 │       │   │   └── authService.ts
-│       │   ├── store/         # State (Zustand store, etc.)
-│       │   │   └── authStore.ts
+│       │   ├── store/         # Redux Toolkit slice for this feature (see redux.md)
+│       │   │   └── authSlice.ts
 │       │   └── types.ts
 │       └── profile/
 │           └── ...            # Same structure as auth/
@@ -58,10 +63,10 @@ Expo Router supports **route groups** (parenthesized directories like `(auth)`) 
 ```tsx
 // app/(app)/_layout.tsx — redirect unauthenticated users at the layout level
 import { Redirect, Tabs } from 'expo-router';
-import { useAuthStore } from '@/features/auth/store/authStore';
+import { useAppSelector } from '@/core/store/hooks';
 
 export default function AppLayout() {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   if (!isAuthenticated) return <Redirect href="/login" />;
   return <Tabs />;
 }
@@ -88,6 +93,7 @@ Internal files (`store/`, `components/`) are implementation details — only imp
 | Components | `PascalCase.tsx` | `UserCard.tsx` |
 | Hooks | `camelCase.ts` | `useAuth.ts` |
 | Services | `camelCase.ts` | `authService.ts` |
+| Redux slices | `camelCase.ts` + `Slice` suffix | `authSlice.ts` |
 | Tests | `<subject>.test.tsx` | `UserCard.test.tsx` |
 
 ## Key Config Files

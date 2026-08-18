@@ -1,6 +1,6 @@
 name: react-web
 version: 1.0.0
 type: development
-description: "Coding conventions, best practices, and project structure guidelines for React web development."
+description: "Coding conventions, best practices, and project structure guidelines for React web development. Includes Redux Toolkit state management patterns."
 skills: []
 hooks: {}

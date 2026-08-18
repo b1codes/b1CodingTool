@@ -21,7 +21,7 @@ export function UserAvatar({ uri, size = 40, onPress }: UserAvatarProps) { ... }
 |--------|-----------|---------|
 | Components / Screens | `PascalCase.tsx` | `UserCard.tsx`, `ProfileScreen.tsx` |
 | Hooks | `camelCase` with `use` prefix | `useAuth.ts`, `useNotifications.ts` |
-| Stores | `camelCase` + `Store` suffix | `authStore.ts` |
+| Redux slices | `camelCase` + `Slice` suffix | `authSlice.ts` |
 | Services | `camelCase` + `Service` suffix | `authService.ts` |
 | Route files (Expo Router) | `kebab-case.tsx` | `user-profile.tsx` (maps to `/user-profile`) |
 | Layout files | `_layout.tsx` | `_layout.tsx` |

@@ -1,6 +1,6 @@
 name: react-native
 version: 1.0.0
 type: development
-description: "Coding conventions, best practices, and project structure guidelines for React Native development with Expo."
+description: "Coding conventions, best practices, and project structure guidelines for React Native development with Expo. Includes Redux Toolkit state management patterns."
 skills: []
 hooks: {}

@@ -55,7 +55,9 @@ pnpm dlx create-vite         # run a one-off package without installing globally
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.24.0"
+    "react-router-dom": "^6.24.0",
+    "@reduxjs/toolkit": "^2.2.7",
+    "react-redux": "^9.1.2"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

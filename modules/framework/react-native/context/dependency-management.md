@@ -26,15 +26,15 @@ npm install expo-camera
 pnpm add expo-camera
 ```
 
-For non-Expo packages (e.g., `date-fns`, `zod`, `zustand`), use your package manager directly — `npx expo install` works for these too, but there's no SDK constraint to worry about.
+For non-Expo packages (e.g., `date-fns`, `zod`, `@reduxjs/toolkit`), use your package manager directly — `npx expo install` works for these too, but there's no SDK constraint to worry about.
 
 ## Common Commands
 
 ```bash
 # Installing
 npx expo install expo-image expo-router   # Expo/React Native packages (SDK-aware)
-npm install zod zustand                   # Pure JS packages
-pnpm add zod zustand                      # Same, with pnpm
+npm install zod @reduxjs/toolkit react-redux   # Pure JS packages
+pnpm add zod @reduxjs/toolkit react-redux      # Same, with pnpm
 
 # Dev dependencies
 npm install -D @testing-library/react-native jest-expo
@@ -73,7 +73,11 @@ npx expo upgrade                          # Bumps SDK version and adjusts all ex
     "expo-status-bar": "~1.12.1",
     "react": "18.2.0",
     "react-native": "0.74.1",
-    "@sentry/react-native": "~5.22.0"
+    "@sentry/react-native": "~5.22.0",
+    "@reduxjs/toolkit": "^2.2.7",
+    "react-redux": "^9.1.2",
+    "redux-persist": "^6.0.0",
+    "@react-native-async-storage/async-storage": "1.23.1"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",

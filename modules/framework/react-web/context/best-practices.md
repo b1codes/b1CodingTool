@@ -21,10 +21,10 @@ useEffect(() => {
 ```
 
 ## State Management
-- Keep state as local as possible. Lift only when two sibling components genuinely need the same value.
-- Use `useReducer` over multiple related `useState` calls when state transitions are complex or interdependent.
-- Prefer **server state libraries** (TanStack Query, SWR) over manually managing fetch/loading/error state in `useState` + `useEffect`.
-- Reserve context for truly global, low-frequency values (theme, locale, auth user). Don't use context as a substitute for a proper state manager — it re-renders all consumers on every change.
+- Keep local component state (`useState`/`useReducer`) for data genuinely owned by one component with no other consumers. Anything shared, cross-feature, or business-relevant belongs in a **Redux Toolkit** slice — see `redux.md`.
+- Use `useReducer` over multiple related `useState` calls when *local* state transitions are complex or interdependent; once the state is shared, move it to a slice instead of reaching for `useReducer` + context.
+- Use **RTK Query** (part of Redux Toolkit) for server state — it supersedes manually managing fetch/loading/error state in `useState` + `useEffect`, and standalone libraries like TanStack Query or SWR. See `redux.md`.
+- Reserve context for truly global, low-frequency, non-transactional values (theme, locale) — not as a substitute for a slice. Once a value has real transitions or is written from more than one place, it belongs in Redux.
 
 ## Performance
 - Wrap expensive computations in `useMemo`; wrap callbacks passed as props in `useCallback` — but only when you have a measured reason to, not preemptively.

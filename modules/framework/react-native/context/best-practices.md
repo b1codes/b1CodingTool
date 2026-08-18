@@ -48,9 +48,14 @@ import { FlashList } from '@shopify/flash-list';
 - Use `expo-image` instead of the built-in `Image` for better caching and performance.
 - Prefer vector icons (`@expo/vector-icons`) over bitmap images for UI icons — they scale without blurring.
 
+## State Management
+- Keep local component state (`useState`/`useReducer`) for data genuinely owned by one component with no other consumers. Anything shared across screens, anything that must survive navigation, or anything business-relevant belongs in a **Redux Toolkit** slice — see `redux.md`.
+- Use **RTK Query** (part of Redux Toolkit) for server state instead of manual `useState` + `useEffect` fetching. See `redux.md`.
+- Provide the store from the Expo Router root layout (`app/_layout.tsx`), above the navigator, so every route can reach it.
+
 ## Async & State
 - After any `await` in an event handler, check whether the component is still mounted before calling `setState`. Use a ref flag or the `useEffect` cleanup pattern.
-- Use `SecureStore` (from `expo-secure-store`) for sensitive data (tokens, credentials) — never `AsyncStorage` for secrets.
+- Use `SecureStore` (from `expo-secure-store`) for sensitive data (tokens, credentials) — never `AsyncStorage` for secrets, and never persist a Redux slice containing them through `redux-persist` (which writes to `AsyncStorage`). See `redux.md` for the persistence pattern.
 - Use `AsyncStorage` only for non-sensitive, serializable user preferences.
 
 ## Accessibility

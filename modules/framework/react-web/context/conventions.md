@@ -22,6 +22,7 @@ export function UserCard({ user, onSelect }: UserCardProps) { ... }
 | Components | `PascalCase` | `UserCard`, `LoginForm` |
 | Hooks | `camelCase` with `use` prefix | `useAuth`, `useUserList` |
 | Context | `PascalCase` + `Context` suffix | `ThemeContext`, `AuthContext` |
+| Redux slices | `camelCase` + `Slice` suffix | `authSlice`, `counterSlice` |
 | Files (components) | `PascalCase.tsx` | `UserCard.tsx` |
 | Files (hooks/utils) | `camelCase.ts` | `useAuth.ts`, `formatDate.ts` |
 | Files (tests) | `<subject>.test.tsx` | `UserCard.test.tsx` |

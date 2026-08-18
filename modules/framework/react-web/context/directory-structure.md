@@ -18,6 +18,10 @@ src/
 │   ├── utils/                 # Pure utility functions (no React dependencies)
 │   ├── types/                 # Shared TypeScript types/interfaces
 │   ├── constants/             # App-wide constants
+│   ├── store/                 # Redux Toolkit store setup (see redux.md)
+│   │   ├── index.ts           # configureStore, RootState/AppDispatch types
+│   │   ├── hooks.ts           # useAppDispatch/useAppSelector
+│   │   └── api.ts             # createApi — shared RTK Query base
 │   └── router/
 │       └── router.tsx         # Route definitions (React Router, TanStack Router, etc.)
 ├── features/
@@ -31,8 +35,8 @@ src/
 │   │   │   └── RegisterPage.tsx
 │   │   ├── services/          # API call functions for this feature
 │   │   │   └── authService.ts
-│   │   ├── store/             # State slice (Zustand store, Redux slice, etc.)
-│   │   │   └── authStore.ts
+│   │   ├── store/             # Redux Toolkit slice for this feature (see redux.md)
+│   │   │   └── authSlice.ts
 │   │   └── types.ts           # Feature-local types
 │   └── dashboard/
 │       └── ...                # Same structure as auth/
@@ -75,7 +79,7 @@ export async function login(credentials: LoginCredentials): Promise<AuthUser> {
 | Components / Pages | `PascalCase.tsx` | `UserProfile.tsx`, `LoginPage.tsx` |
 | Hooks | `camelCase.ts` | `useAuth.ts` |
 | Services | `camelCase.ts` | `authService.ts` |
-| Stores/slices | `camelCase.ts` | `authStore.ts` |
+| Redux slices | `camelCase.ts` + `Slice` suffix | `authSlice.ts` |
 | Tests | `<subject>.test.tsx` | `LoginForm.test.tsx` |
 | Types | `camelCase.ts` or `types.ts` | `types.ts` |
 | Barrel exports | `index.ts` | `index.ts` |
