@@ -1,0 +1,16 @@
+name: orbstack
+version: 1.0.0
+type: development
+description: "Guidelines for using OrbStack as a Docker-compatible container engine and Linux machine host on macOS."
+skills:
+  - name: "Docker Desktop Migrator"
+    description: "Moves containers, volumes, and images from Docker Desktop to OrbStack and switches the Docker context."
+  - name: "Local Domain Configurator"
+    description: "Adds dev.orbstack.domains labels so Compose services get stable HTTPS *.orb.local URLs instead of port numbers."
+commands:
+  - name: "/orbstack migrate"
+    description: "Migrate Docker Desktop data to OrbStack and switch the active Docker context."
+  - name: "/orbstack domains"
+    description: "Generate compose.orbstack.yaml assigning custom local domains to the project's services."
+hooks:
+  post-install: "scripts/post-install.sh"

@@ -1,0 +1,16 @@
+name: docker
+version: 1.1.0
+type: deployment
+description: "Guidelines, templates, and skills for Dockerizing backend services (local dev & production) without complex orchestrators."
+skills:
+  - name: "Docker Project Initializer"
+    description: "Generates a multi-stage Dockerfile and a compose.yaml with optional PostgreSQL, Redis, and backup services."
+  - name: "Docker Configuration Auditor"
+    description: "Reviews Dockerfiles and Compose files for root users, unpinned tags, missing health checks, and leaked secrets."
+commands:
+  - name: "/docker init"
+    description: "Initialize a Dockerfile and compose.yaml based on project requirements."
+  - name: "/docker audit"
+    description: "Audit existing Dockerfiles and Compose files against the module's best practices."
+hooks:
+  post-install: "scripts/post-install.sh"

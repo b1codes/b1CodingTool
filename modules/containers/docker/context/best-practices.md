@@ -1,7 +1,7 @@
 # Docker: Best Practices
 
 ## Local Development
-- **Docker Compose:** Use `docker-compose.yaml` to orchestrate services locally.
+- **Docker Compose:** Use `compose.yaml` and `docker compose` (v2) to orchestrate services locally.
 - **Volumes:** Mount project directories as volumes for live-reloading.
 - **Environment Variables:** Use `.env` files for local configuration.
 

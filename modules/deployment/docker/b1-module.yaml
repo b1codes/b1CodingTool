@@ -1,7 +1,0 @@
-name: docker
-version: 1.0.0
-type: deployment
-description: "Guidelines, templates, and skills for Dockerizing backend services (local dev & production) without complex orchestrators."
-commands:
-  - name: "/docker init"
-    description: "Initialize a Dockerfile and docker-compose.yml based on project requirements."

@@ -1,0 +1,8 @@
+# compose.orbstack.yaml — OrbStack-only overrides. Other engines ignore this file.
+# Usage: docker compose -f compose.yaml -f compose.orbstack.yaml up
+#
+# Services without a label are still reachable at <service>.{{PROJECT_NAME}}.orb.local.
+services:
+  {{SERVICE_NAME}}:
+    labels:
+      - dev.orbstack.domains={{DOMAINS}}
