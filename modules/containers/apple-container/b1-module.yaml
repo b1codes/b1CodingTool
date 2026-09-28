@@ -1,0 +1,16 @@
+name: apple-container
+version: 1.0.0
+type: development
+description: "Guidelines and scaffolding for running Linux containers with Apple's native `container` CLI on Apple silicon Macs."
+skills:
+  - name: "Compose-to-Container Translator"
+    description: "Converts a compose.yaml into an idempotent shell script of `container run` commands with DNS names and readiness polling."
+  - name: "Container Runtime Doctor"
+    description: "Diagnoses `container` system services, DNS domain setup, and macOS version limitations."
+commands:
+  - name: "/apple-container init"
+    description: "Generate scripts/dev-containers.sh (and the DNS config) from the project's services."
+  - name: "/apple-container doctor"
+    description: "Check that `container` services are running and container DNS names resolve."
+hooks:
+  post-install: "scripts/post-install.sh"

@@ -1,0 +1,75 @@
+#!/bin/bash
+# dev-containers.sh: Compose replacement for Apple's `container` CLI.
+# Usage: scripts/dev-containers.sh [up|down|status]
+#
+# Containers reach each other as <name>.{{DNS_DOMAIN}} on the default network.
+# One-time setup: see the apple-container module's best-practices.md (DNS section).
+set -euo pipefail
+
+PROJECT="{{PROJECT_NAME}}"
+DOMAIN="{{DNS_DOMAIN}}"
+ENV_FILE=".env"
+
+DB_NAME="${PROJECT}-db"
+APP_NAME="${PROJECT}-app"
+DB_VOLUME="${PROJECT}-postgres-data"
+
+exists() { container inspect "$1" &> /dev/null; }
+
+ensure_volume() {
+    container volume inspect "$1" &> /dev/null || container volume create "$1" > /dev/null
+}
+
+wait_for() {
+    # wait_for <description> <command...> — replaces compose's depends_on/healthcheck.
+    local what="$1"; shift
+    for _ in $(seq 1 30); do
+        if "$@" &> /dev/null; then return 0; fi
+        sleep 1
+    done
+    echo "❌ Timed out waiting for ${what}." >&2
+    exit 1
+}
+
+up() {
+    container system status &> /dev/null || container system start
+
+    ensure_volume "$DB_VOLUME"
+    if ! exists "$DB_NAME"; then
+        container run -d --name "$DB_NAME" \
+            --env-file "$ENV_FILE" \
+            -v "${DB_VOLUME}:/var/lib/postgresql/data" \
+            docker.io/library/postgres:16-alpine
+    fi
+    wait_for "database" container exec "$DB_NAME" pg_isready
+
+    if ! exists "$APP_NAME"; then
+        container build -t "${PROJECT}:dev" .
+        container run -d --name "$APP_NAME" \
+            --env-file "$ENV_FILE" \
+            -e "DB_HOST=${DB_NAME}.${DOMAIN}" \
+            -v "$PWD:/app" \
+            -p 8000:8000 \
+            "${PROJECT}:dev"
+    fi
+
+    echo "✅ Up. App: http://localhost:8000 — DB: ${DB_NAME}.${DOMAIN}:5432"
+}
+
+down() {
+    for name in "$APP_NAME" "$DB_NAME"; do
+        if exists "$name"; then container delete --force "$name" > /dev/null; fi
+    done
+    echo "🛑 Stopped. Volume '${DB_VOLUME}' kept; remove it with: container volume delete ${DB_VOLUME}"
+}
+
+status() {
+    container list --all
+}
+
+case "${1:-up}" in
+    up) up ;;
+    down) down ;;
+    status) status ;;
+    *) echo "Usage: $0 [up|down|status]" >&2; exit 2 ;;
+esac

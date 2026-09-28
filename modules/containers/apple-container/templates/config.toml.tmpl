@@ -1,0 +1,9 @@
+# ~/.config/container/config.toml
+# Enables <name>.{{DNS_DOMAIN}} lookups between containers on the default network.
+# After saving:
+#   container system stop && container system start
+#   sudo container system dns create {{DNS_DOMAIN}}
+# If this file already exists, edit its [dns] table in place — TOML forbids a duplicate table.
+
+[dns]
+domain = "{{DNS_DOMAIN}}"
