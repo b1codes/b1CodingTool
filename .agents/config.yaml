@@ -1,4 +1,10 @@
 active_agents:
 - CLAUDE
 - GEMINI
+bundles: {}
+clickup_list_id: '901414778471'
+default_branch: null
+github_owner: null
+github_repo: null
+skillsmp_api_key: null
 upstream_repo: ''
